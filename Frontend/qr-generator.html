@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free QR Code Generator (Link & Wi-Fi) — Convertkaro.in</title>
+<meta name="description" content="Generate QR codes for links, text, and Wi-Fi instantly. Add custom titles. 100% free and private.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+/* ── BASIC SETUP ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+:root { --bg: #f8f7f4; --white: #ffffff; --red: #e02b20; --red-hover: #c4231a; --red-light: rgba(224,43,32,0.07); --ink: #141414; --ink-2: #3d3d3d; --ink-3: #888; --border: #e4e2dc; --success: #2d8a4e; }
+body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+
+/* Nav & Breadcrumb */
+nav { position:fixed; top:0; left:0; right:0; z-index:100; height:68px; display:flex; align-items:center; justify-content:space-between; padding:0 48px; background:rgba(248,247,244,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+.logo { display:flex; align-items:center; gap:9px; text-decoration:none; } .logo-mark img { width:32px; height:32px; object-fit:cover; border-radius:8px; }
+.logo-name { font-size:17px; font-weight:700; color:var(--ink); } .logo-name span { color:var(--red); }
+.nav-links { display:flex; gap:32px; list-style:none; } .nav-links a { font-size:14px; font-weight:500; color:var(--ink-3); text-decoration:none; }
+.breadcrumb { padding:88px 48px 0; font-size:13px; color:var(--ink-3); } .breadcrumb a { color:var(--ink-3); text-decoration:none; }
+
+/* Hero */
+.page-hero { padding:32px 48px 40px; display:flex; align-items:center; gap:20px; }
+.tool-icon-big { width:64px; height:64px; border-radius:18px; background:var(--red-light); border:1.5px solid rgba(224,43,32,0.2); display:grid; place-items:center; font-size:30px; }
+.page-title { font-size:clamp(26px,4vw,38px); font-weight:800; color:var(--ink); margin-bottom:6px; } .page-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); }
+.page-sub { font-size:15px; color:var(--ink-3); }
+
+.main { padding:0 48px 80px; max-width: 1000px; margin: 0 auto; } 
+
+/* Workspace */
+.workspace { display:grid; grid-template-columns: 1fr 380px; gap:24px; }
+.panel-box { background:var(--white); border:1.5px solid var(--border); border-radius:20px; padding:32px; }
+
+/* Tabs */
+.tabs { display:flex; gap:8px; background:var(--bg); padding:6px; border-radius:12px; margin-bottom:24px; }
+.tab-btn { flex:1; padding:10px; font-size:14px; font-weight:700; font-family:inherit; color:var(--ink-3); background:transparent; border:none; border-radius:8px; cursor:pointer; transition:0.2s; }
+.tab-btn.active { background:var(--white); color:var(--ink); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+
+/* Input Area */
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+.input-label { font-size:13px; font-weight:700; color:var(--ink-2); margin-bottom:8px; display:block; }
+.input-wrap textarea { width:100%; height:120px; padding:16px; border:1.5px solid var(--border); border-radius:12px; font-family:inherit; font-size:15px; resize:none; outline:none; transition:0.2s; margin-bottom:20px;}
+.input-wrap textarea:focus { border-color:var(--red); }
+.input-wrap input, .input-wrap select { width:100%; padding:14px 16px; border:1.5px solid var(--border); border-radius:12px; font-family:inherit; font-size:15px; outline:none; transition:0.2s; margin-bottom:20px;}
+.input-wrap input:focus, .input-wrap select:focus { border-color:var(--red); }
+
+.btn-generate { background:var(--red); color:#fff; font-size:15px; font-weight:700; padding:14px 32px; border:none; border-radius:10px; cursor:pointer; margin-top:10px; transition:0.2s; width:100%;}
+.btn-generate:hover { background:var(--red-hover); transform:translateY(-2px); }
+
+/* Output Area */
+.qr-preview-area { display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg); border-radius:12px; padding:32px; min-height:300px; border:1.5px dashed var(--border); }
+#finalQrContainer { box-shadow:0 8px 24px rgba(0,0,0,0.08); border-radius:12px; overflow:hidden; display:none; }
+.placeholder-qr { font-size:48px; opacity:0.2; }
+.btn-download { width:100%; background:var(--success); color:#fff; font-size:15px; font-weight:700; padding:14px; border:none; border-radius:12px; cursor:pointer; margin-top:20px; display:none; transition:0.2s; }
+.btn-download:hover { transform:translateY(-2px); }
+
+@media(max-width:768px){ .workspace { grid-template-columns: 1fr; } nav { padding:0 20px;} .nav-links{display:none;} .main{padding:0 20px 80px;} }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="favicon.ico" alt="Convertkaro"></div>
+    <div class="logo-name">Convertkaro<span>.in</span></div>
+  </a>
+  <ul class="nav-links"><li><a href="index.html#tools">All Tools</a></li></ul>
+</nav>
+
+<div class="breadcrumb"><a href="index.html">Home</a> › <strong>QR Code Generator</strong></div>
+
+<div class="page-hero">
+  <div class="tool-icon-big">🔲</div>
+  <div>
+    <h1 class="page-title">Create <span class="serif">QR Code</span></h1>
+    <p class="page-sub">Turn any link, text, or Wi-Fi password into a scannable QR code.</p>
+  </div>
+</div>
+
+<div class="main">
+  <div class="workspace">
+    <div class="panel-box">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('textTab')">🔗 Link / Text</button>
+        <button class="tab-btn" onclick="switchTab('wifiTab')">📶 Wi-Fi</button>
+      </div>
+      
+      <div id="textTab" class="tab-content active input-wrap">
+        <label class="input-label">Enter Link or Text *</label>
+        <textarea id="qrText" placeholder="e.g., https://convertkaro.in/"></textarea>
+      </div>
+
+      <div id="wifiTab" class="tab-content input-wrap">
+        <label class="input-label">Network Name (SSID) *</label>
+        <input type="text" id="wifiName" placeholder="e.g., JioFiber-5G">
+        
+        <label class="input-label">Password *</label>
+        <input type="text" id="wifiPass" placeholder="Enter Wi-Fi password">
+        
+        <label class="input-label">Security Type</label>
+        <select id="wifiType">
+          <option value="WPA">WPA/WPA2 (Most Common)</option>
+          <option value="WEP">WEP</option>
+          <option value="nopass">None (Open Network)</option>
+        </select>
+      </div>
+
+      <div class="input-wrap" style="border-top:1px solid var(--border); padding-top:20px; margin-top:10px;">
+        <label class="input-label">Add a Title (Optional)</label>
+        <input type="text" id="qrTitle" placeholder="e.g., Scan to Connect!">
+      </div>
+      
+      <button class="btn-generate" onclick="generateQR()">✨ Generate QR Code</button>
+    </div>
+
+    <div class="panel-box" style="display:flex; flex-direction:column;">
+      <h3 style="font-size:16px; margin-bottom:16px;">Your QR Code</h3>
+      <div class="qr-preview-area" id="qrPreviewArea">
+        <div class="placeholder-qr" id="qrPlaceholder">📱</div>
+        <div id="finalQrContainer"></div>
+      </div>
+      <button class="btn-download" id="downloadBtn" onclick="downloadQR()">⬇ Download PNG</button>
+    </div>
+  </div>
+</div>
+
+<div id="hiddenQrRenderer" style="display:none;"></div>
+
+<script>
+let currentTab = 'textTab';
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  // Update buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  // Update content
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+function generateQR() {
+  let finalQrString = "";
+  
+  // Logic based on active tab
+  if(currentTab === 'textTab') {
+    finalQrString = document.getElementById("qrText").value.trim();
+    if(!finalQrString) return alert("Please enter text or a link!");
+  } 
+  else if (currentTab === 'wifiTab') {
+    const ssid = document.getElementById("wifiName").value.trim();
+    const pass = document.getElementById("wifiPass").value.trim();
+    const type = document.getElementById("wifiType").value;
+    
+    if(!ssid) return alert("Network Name is required!");
+    
+    // Wi-Fi QR Code Format String
+    finalQrString = `WIFI:S:${ssid};T:${type};P:${pass};;`;
+  }
+
+  const title = document.getElementById("qrTitle").value.trim();
+  const hiddenRenderer = document.getElementById("hiddenQrRenderer");
+  const finalContainer = document.getElementById("finalQrContainer");
+  const placeholder = document.getElementById("qrPlaceholder");
+  const downloadBtn = document.getElementById("downloadBtn");
+
+  // Clear previous
+  hiddenRenderer.innerHTML = "";
+  
+  // Generate raw QR
+  new QRCode(hiddenRenderer, {
+    text: finalQrString,
+    width: 220,
+    height: 220,
+    colorDark : "#141414",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+
+  // Canvas Magic for Title
+  setTimeout(() => {
+    const rawCanvas = hiddenRenderer.querySelector("canvas");
+    if(!rawCanvas) return;
+
+    const padding = 20;
+    const textHeightSpace = title ? 40 : 0; 
+    
+    const masterCanvas = document.createElement("canvas");
+    const ctx = masterCanvas.getContext("2d");
+    
+    masterCanvas.width = rawCanvas.width + (padding * 2);
+    masterCanvas.height = rawCanvas.height + (padding * 2) + textHeightSpace;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, masterCanvas.width, masterCanvas.height);
+    ctx.drawImage(rawCanvas, padding, padding);
+
+    if(title) {
+      ctx.fillStyle = "#141414";
+      ctx.font = "bold 16px 'Plus Jakarta Sans', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(title, masterCanvas.width / 2, masterCanvas.height - 18);
+    }
+
+    finalContainer.innerHTML = "";
+    masterCanvas.style.maxWidth = "100%";
+    masterCanvas.style.height = "auto";
+    masterCanvas.style.borderRadius = "12px";
+    
+    finalContainer.appendChild(masterCanvas);
+    placeholder.style.display = "none";
+    finalContainer.style.display = "block";
+    downloadBtn.style.display = "block";
+  }, 50); 
+}
+
+function downloadQR() {
+  const finalContainer = document.getElementById("finalQrContainer");
+  const masterCanvas = finalContainer.querySelector("canvas");
+  
+  if(masterCanvas) {
+    const a = document.createElement("a");
+    a.href = masterCanvas.toDataURL("image/png");
+    let fileNameTitle = document.getElementById("qrTitle").value.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    
+    // Default name changes if it's a Wi-Fi code
+    let defaultName = currentTab === 'wifiTab' ? "convertkaro_wifi_qr.png" : "convertkaro_qrcode.png";
+    a.download = fileNameTitle ? `qr_${fileNameTitle}.png` : defaultName;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+</script>
+</body>
+</html>

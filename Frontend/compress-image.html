@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Toolkit: Photo Compressor & Age Calculator — Convertkaro.in</title>
+<meta name="description" content="Crop and resize passport photos, and calculate exact age for Govt. exams. All in one page.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+
+<style>
+/* ── BASIC SETUP ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+:root { --bg: #f8f7f4; --white: #ffffff; --red: #e02b20; --red-hover: #c4231a; --red-light: rgba(224,43,32,0.07); --ink: #141414; --ink-2: #3d3d3d; --ink-3: #888; --border: #e4e2dc; --success: #2d8a4e; --success-bg: #edf7f1; }
+body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+
+/* Nav & Breadcrumb */
+nav { position:fixed; top:0; left:0; right:0; z-index:100; height:68px; display:flex; align-items:center; justify-content:space-between; padding:0 48px; background:rgba(248,247,244,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+.logo { display:flex; align-items:center; gap:9px; text-decoration:none; } .logo-mark img { width:32px; height:32px; object-fit:cover; border-radius:8px; }
+.logo-name { font-size:17px; font-weight:700; color:var(--ink); } .logo-name span { color:var(--red); }
+.nav-links { display:flex; gap:32px; list-style:none; } .nav-links a { font-size:14px; font-weight:500; color:var(--ink-3); text-decoration:none; }
+.breadcrumb { padding:88px 48px 0; font-size:13px; color:var(--ink-3); } .breadcrumb a { color:var(--ink-3); text-decoration:none; }
+
+/* Hero */
+.page-hero { padding:32px 48px 20px; display:flex; align-items:center; gap:20px; }
+.tool-icon-big { width:64px; height:64px; border-radius:18px; background:var(--red-light); border:1.5px solid rgba(224,43,32,0.2); display:grid; place-items:center; font-size:30px; }
+.page-title { font-size:clamp(26px,4vw,38px); font-weight:800; color:var(--ink); margin-bottom:6px; } .page-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); }
+.page-sub { font-size:15px; color:var(--ink-3); }
+.student-badge-hero { display:inline-block; background:#fff2e5; color:#e67300; font-size:12px; font-weight:700; padding:4px 10px; border-radius:6px; margin-bottom:8px; border:1px solid #ffcc99; }
+
+.main { padding:0 48px 80px; max-width: 1100px; margin: 0 auto; } 
+
+/* SECTION DIVIDERS & HEADINGS */
+.section-header { margin: 48px 0 24px; padding-bottom: 16px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.section-header h2 { font-size: 24px; font-weight: 800; color: var(--ink); }
+.section-badge { background: var(--red); color: white; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+
+/* ── TOOL 1: COMPRESSOR STYLES ── */
+input[type="file"] { display:none; }
+.upload-zone { background:var(--white); border:2px dashed var(--border); border-radius:20px; padding:48px 40px; text-align:center; transition:all .25s; margin-bottom:24px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; }
+.upload-zone:hover { border-color:var(--red); background:var(--red-light); }
+.uz-icon { width:56px; height:56px; border-radius:16px; background:var(--bg); border:1.5px solid var(--border); display:grid; place-items:center; font-size:24px; margin-bottom:16px; }
+.uz-btn { background:var(--red); color:#fff; font-size:14px; font-weight:600; padding:10px 28px; border-radius:10px; display:inline-block; margin-top:10px; }
+
+.workspace { display:none; gap:24px; }
+.workspace.active { display:grid; grid-template-columns: 320px 1fr; }
+.panel-box { background:var(--white); border:1.5px solid var(--border); border-radius:20px; padding:24px; display:flex; flex-direction:column; }
+.panel-title { font-size:16px; font-weight:700; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+.btn-ghost { background:transparent; border:1.5px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:0.2s; }
+.btn-ghost:hover { border-color:var(--ink); color:var(--ink); }
+
+.control-group { margin-bottom:20px; }
+.control-label { font-size:13px; font-weight:600; color:var(--ink-2); margin-bottom:8px; display:flex; justify-content:space-between; }
+.dim-inputs { display:flex; gap:12px; }
+.dim-inputs input { width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px; text-align:center; font-family:inherit; }
+.range-slider { width:100%; accent-color:var(--red); }
+.target-kb { color:var(--red); font-weight:700; }
+
+.preview-area { flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg); border-radius:12px; padding:20px; min-height:300px; border:1.5px dashed var(--border); position:relative; }
+.preview-img { max-width:100%; max-height:300px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-bottom:16px; }
+.size-badge { background:var(--ink); color:#fff; padding:6px 14px; border-radius:999px; font-size:14px; font-weight:600; }
+.btn-download { width:100%; background:var(--success); color:#fff; font-size:15px; font-weight:700; padding:14px; border:none; border-radius:12px; cursor:pointer; margin-top:auto; transition:transform 0.1s; }
+.btn-download:hover { transform:translateY(-2px); }
+
+/* Crop Modal */
+.crop-modal { position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.85); display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px); }
+.crop-modal.active { display:flex; }
+.crop-container { width:100%; max-width:600px; height:60vh; background:#000; border-radius:12px; overflow:hidden; margin-bottom:20px; }
+.crop-container img { display:block; max-width:100%; }
+.crop-actions { display:flex; gap:12px; }
+.btn-crop-action { padding:12px 24px; border-radius:10px; font-weight:700; font-family:inherit; cursor:pointer; font-size:14px; border:none; }
+.btn-crop-apply { background:var(--success); color:white; }
+.btn-crop-cancel { background:var(--white); color:var(--ink); }
+
+/* ── TOOL 2: AGE CALCULATOR STYLES ── */
+.age-workspace { display:grid; grid-template-columns: 1fr 1fr; gap:24px; }
+.age-calc-date-input { width:100%; padding:14px 16px; border:1.5px solid var(--border); border-radius:12px; font-family:inherit; font-size:15px; color:var(--ink); outline:none; transition:0.2s; background:var(--bg); cursor:pointer; }
+.age-calc-date-input:focus { border-color:var(--red); box-shadow:0 0 0 4px var(--red-light); background:var(--white); }
+.btn-calc { background:var(--red); color:#fff; font-size:16px; font-weight:700; padding:16px; border:none; border-radius:12px; cursor:pointer; margin-top:10px; transition:0.2s; width:100%; }
+.btn-calc:hover { background:var(--red-hover); transform:translateY(-2px); }
+
+.result-area { display:none; animation: fadeIn 0.4s ease; }
+.age-highlight { font-size:15px; font-weight:600; color:var(--ink-2); margin-bottom:24px; text-align:center; }
+.age-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:20px; }
+.age-box { background:var(--bg); border:1.5px solid var(--border); border-radius:12px; padding:16px 10px; text-align:center; }
+.age-num { font-size:32px; font-weight:800; color:var(--red); line-height:1; margin-bottom:4px; }
+.age-label { font-size:12px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* PIKADAY CUSTOM RED THEME */
+.pika-single { border-color: var(--border); border-radius: 12px; box-shadow: 0 12px 24px rgba(0,0,0,0.08); background: #fff; font-family: inherit;}
+.pika-label { color: var(--ink); font-weight: 700;}
+.pika-table th { color: var(--ink-3); font-weight: 600; font-size: 12px;}
+.pika-button { background: var(--bg); border-radius: 6px; color: var(--ink-2); transition: 0.2s;}
+.pika-button:hover { background: var(--red-light); color: var(--red);}
+.is-selected .pika-button { background: var(--red) !important; color: #fff !important; box-shadow: none !important;}
+.is-today .pika-button { color: var(--red); font-weight: 700; background: var(--white); border: 1.5px solid var(--red-light); }
+.pika-select { font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; outline: none; margin: 0 2px; }
+
+@media(max-width:768px){ .workspace.active, .age-workspace { grid-template-columns: 1fr; } nav { padding:0 20px;} .nav-links{display:none;} .main{padding:0 20px 80px;} .section-header { margin: 32px 0 16px; } }
+</style>
+</head>
+<body>
+
+<input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])">
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="favicon.ico" alt="Convertkaro"></div>
+    <div class="logo-name">Convertkaro<span>.in</span></div>
+  </a>
+  <ul class="nav-links"><li><a href="index.html#tools">All Tools</a></li></ul>
+</nav>
+
+<div class="breadcrumb"><a href="index.html">Home</a> › <strong>Student Toolkit</strong></div>
+
+<div class="page-hero">
+  <div class="tool-icon-big">🎓</div>
+  <div>
+    <div class="student-badge-hero">👨‍🎓 Form Essentials</div>
+    <h1 class="page-title">Student <span class="serif">Toolkit</span></h1>
+    <p class="page-sub">Prepare your documents and details for Govt. exams and admissions in one place.</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="section-header">
+    <div class="section-badge">1</div>
+    <h2>Photo & Sign Compressor</h2>
+  </div>
+  
+  <div id="compressorSection">
+    <label class="upload-zone" id="uploadZone" for="fileInput">
+      <div class="uz-icon">📸</div>
+      <div style="font-size:18px; font-weight:700; margin-bottom:6px;">Upload Photo or Signature</div>
+      <div style="font-size:13px; color:#888; margin-bottom:22px;">Supports JPG, PNG, WEBP. Auto-converts to standard JPG.</div>
+      <div class="uz-btn">Choose Image</div>
+    </label>
+
+    <div class="workspace" id="compressWorkspace">
+      <div class="panel-box">
+        <div class="panel-title">Fix Settings <button class="btn-ghost" onclick="openCropModal()">✂️ Crop Manual</button></div>
+        
+        <div class="control-group">
+          <div class="control-label"><span>Width & Height (Pixels)</span></div>
+          <div class="dim-inputs">
+            <input type="number" id="imgWidth" oninput="updatePreview()" title="Width">
+            <input type="number" id="imgHeight" oninput="updatePreview()" title="Height">
+          </div>
+          <p style="font-size:11px; color:#888; margin-top:6px;">Standard Passport: 350 x 450 | Sign: 250 x 100</p>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Target Size (Compression)</span>
+            <span class="target-kb" id="liveKbDisplay">... KB</span>
+          </div>
+          <input type="range" id="qualitySlider" class="range-slider" min="0.1" max="1.0" step="0.05" value="0.8" oninput="updatePreview()">
+          <p style="font-size:11px; color:#888; margin-top:6px;">Slide left for lower KB (decreases quality)</p>
+        </div>
+
+        <button class="btn-download" onclick="downloadImage()">⬇ Download Final JPG</button>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">Live Preview <button class="btn-ghost" style="border:none; color:var(--red);" onclick="resetTool()">✕ Close</button></div>
+        <div class="preview-area">
+          <img id="previewImg" class="preview-img" src="">
+          <div class="size-badge" id="sizeBadge">0 KB</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-badge">2</div>
+    <h2>Exact Age Calculator</h2>
+  </div>
+
+  <div id="ageSection">
+    <div class="age-workspace">
+      
+      <div class="panel-box">
+        <div class="panel-title">Enter Form Dates</div>
+        <div class="control-group">
+          <label class="control-label">Your Date of Birth *</label>
+          <input type="text" id="dob" class="age-calc-date-input" readonly placeholder="Click to select Date">
+        </div>
+        <div class="control-group">
+          <label class="control-label">Calculate Age As On *</label>
+          <input type="text" id="targetDate" class="age-calc-date-input" readonly placeholder="Click to select Date">
+          <p style="font-size:12px; color:#888; margin-top:6px;">Defaults to today. Adjust based on form notification.</p>
+        </div>
+        <button class="btn-calc" onclick="calculateAge()">Calculate Exact Age</button>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">Your Results</div>
+        
+        <div id="agePlaceholder" style="text-align:center; padding:30px 0; color:#888; font-size:14px;">
+          <div style="font-size:40px; margin-bottom:12px; opacity:0.3;">⏳</div>
+          Select dates to see exact years, months, and days.
+        </div>
+
+        <div class="result-area" id="ageResultArea">
+          <div class="age-highlight">You are exactly:</div>
+          <div class="age-grid">
+            <div class="age-box"><div class="age-num" id="resYears">0</div><div class="age-label">Years</div></div>
+            <div class="age-box"><div class="age-num" id="resMonths">0</div><div class="age-label">Months</div></div>
+            <div class="age-box"><div class="age-num" id="resDays">0</div><div class="age-label">Days</div></div>
+          </div>
+          <div style="background:var(--success-bg); border-radius:10px; padding:12px; font-size:13px; color:var(--success); font-weight:600; display:flex; gap:10px;">
+            <span style="font-size:16px;">💡</span> Tip: Verify this exact age against eligibility criteria.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="crop-modal" id="cropModal">
+  <div style="color:white; margin-bottom:12px; font-weight:700;">Drag the corners to crop your image</div>
+  <div class="crop-container"><img id="cropTarget" src=""></div>
+  <div class="crop-actions">
+    <button class="btn-crop-action btn-crop-cancel" onclick="closeCropModal()">Cancel</button>
+    <button class="btn-crop-action btn-crop-apply" onclick="applyCrop()">✅ Apply Crop</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+
+<script>
+// --- PHOTO COMPRESSOR LOGIC ---
+let originalImage = new Image();
+let originalName = "convertkaro_photo.jpg";
+let finalDataUrl = "";
+let cropper = null;
+
+function handleFile(f) {
+  if(!f || !f.type.startsWith('image/')) return;
+  originalName = f.name.replace(/\.[^/.]+$/, "") + "_convertkaro.jpg"; 
+  const reader = new FileReader();
+  reader.onload = (e) => loadImageToWorkspace(e.target.result);
+  reader.readAsDataURL(f);
+}
+
+function loadImageToWorkspace(srcData) {
+  originalImage.onload = () => {
+    document.getElementById('imgWidth').value = originalImage.width;
+    document.getElementById('imgHeight').value = originalImage.height;
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('compressWorkspace').classList.add('active');
+    updatePreview();
+  };
+  originalImage.src = srcData;
+}
+
+function openCropModal() {
+  const cropModal = document.getElementById('cropModal');
+  const cropTarget = document.getElementById('cropTarget');
+  cropTarget.src = originalImage.src;
+  cropModal.classList.add('active');
+  if(cropper) cropper.destroy();
+  cropper = new Cropper(cropTarget, { viewMode: 1, autoCropArea: 0.8 });
+}
+
+function closeCropModal() {
+  document.getElementById('cropModal').classList.remove('active');
+  if(cropper) { cropper.destroy(); cropper = null; }
+}
+
+function applyCrop() {
+  if(!cropper) return;
+  const croppedDataUrl = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' }).toDataURL('image/jpeg', 1.0);
+  closeCropModal();
+  loadImageToWorkspace(croppedDataUrl); 
+}
+
+function updatePreview() {
+  const w = parseInt(document.getElementById('imgWidth').value) || originalImage.width;
+  const h = parseInt(document.getElementById('imgHeight').value) || originalImage.height;
+  const quality = parseFloat(document.getElementById('qualitySlider').value);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(originalImage, 0, 0, w, h);
+
+  finalDataUrl = canvas.toDataURL('image/jpeg', quality);
+  document.getElementById('previewImg').src = finalDataUrl;
+
+  let sizeInKb = (Math.ceil((finalDataUrl.length - 23) * 0.75) / 1024).toFixed(1);
+  document.getElementById('liveKbDisplay').textContent = sizeInKb + ' KB';
+  document.getElementById('sizeBadge').textContent = sizeInKb + ' KB';
+}
+
+function downloadImage() {
+  const a = document.createElement('a'); a.href = finalDataUrl; a.download = originalName;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function resetTool() {
+  document.getElementById('uploadZone').style.display = 'flex';
+  document.getElementById('compressWorkspace').classList.remove('active');
+  document.getElementById('fileInput').value = '';
+}
+
+// --- AGE CALCULATOR LOGIC (WITH PIKADAY) ---
+const calendarConfig = {
+    format: 'D/M/YYYY',
+    toString(date) {
+        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    },
+    yearRange: [1940, new Date().getFullYear() + 5],
+    showYearDropdown: true,
+    showMonthDropdown: true,
+    bound: true,
+    position: 'bottom left',
+    theme: 'pika-red'
+};
+
+var pickerDob = new Pikaday({
+    ...calendarConfig,
+    field: document.getElementById('dob'),
+    yearRange: [1920, new Date().getFullYear()],
+    maxDate: new Date(),
+});
+
+var pickerTarget = new Pikaday({
+    ...calendarConfig,
+    field: document.getElementById('targetDate'),
+    yearRange: [2000, new Date().getFullYear() + 20],
+    defaultDate: new Date(),
+    setDefaultDate: true
+});
+
+function calculateAge() {
+  const dobInput = document.getElementById('dob');
+  const targetDateInput = document.getElementById('targetDate');
+
+  if (!dobInput.value || !targetDateInput.value) return alert("Please select both dates!");
+  
+  const dob = pickerDob.getDate();
+  const target = pickerTarget.getDate();
+
+  if (dob > target) return alert("Date of Birth cannot be after the Calculate As On date!");
+
+  let years = target.getFullYear() - dob.getFullYear();
+  let months = target.getMonth() - dob.getMonth();
+  let days = target.getDate() - dob.getDate();
+
+  if (days < 0) { months--; days += new Date(target.getFullYear(), target.getMonth(), 0).getDate(); }
+  if (months < 0) { years--; months += 12; }
+
+  document.getElementById('agePlaceholder').style.display = 'none';
+  document.getElementById('resYears').textContent = years;
+  document.getElementById('resMonths').textContent = months;
+  document.getElementById('resDays').textContent = days;
+  document.getElementById('ageResultArea').style.display = 'block';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlock PDF Free — Convertkaro.in</title>
+<meta name="description" content="Remove password protection from your PDF for free. Works seamlessly with our secure backend.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+:root {
+  --bg: #f8f7f4; --white: #ffffff; --red: #e02b20; --red-hover: #c4231a;
+  --red-light: rgba(224,43,32,0.07); --ink: #141414; --ink-2: #3d3d3d;
+  --ink-3: #888; --border: #e4e2dc; --radius: 16px;
+  --success: #2d8a4e; --success-bg: #edf7f1;
+}
+
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100; height:68px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 48px; background:rgba(248,247,244,0.92);
+  backdrop-filter:blur(20px); border-bottom:1px solid var(--border);
+}
+.logo { display:flex; align-items:center; gap:9px; text-decoration:none; }
+.logo-mark { width:32px; height:32px; border-radius:8px; overflow:hidden; display:grid; place-items:center; flex-shrink:0; } .logo-mark img { width:32px; height:32px; object-fit:cover; border-radius:8px; }
+.logo-name { font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-0.4px; }
+.logo-name span { color:var(--red); }
+.nav-links { display:flex; gap:32px; list-style:none; }
+.nav-links a { font-size:14px; font-weight:500; color:var(--ink-3); text-decoration:none; transition:color .2s; }
+.nav-links a:hover { color:var(--ink); }
+.nav-cta { background:var(--red); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:600; padding:10px 24px; border:none; border-radius:10px; cursor:pointer; transition:background .2s, transform .15s; }
+.nav-cta:hover { background:var(--red-hover); transform:translateY(-1px); }
+
+/* ── BREADCRUMB ── */
+.breadcrumb { padding:88px 48px 0; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-3); }
+.breadcrumb a { color:var(--ink-3); text-decoration:none; transition:color .2s; }
+.breadcrumb a:hover { color:var(--red); }
+.breadcrumb strong { color:var(--ink-2); font-weight:500; }
+
+/* ── PAGE HERO ── */
+.page-hero { padding:32px 48px 40px; display:flex; align-items:center; gap:20px; }
+.tool-icon-big { width:64px; height:64px; border-radius:18px; background:var(--red-light); border:1.5px solid rgba(224,43,32,0.2); display:grid; place-items:center; font-size:30px; flex-shrink:0; }
+.page-title { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; line-height:1.1; color:var(--ink); margin-bottom:6px; }
+.page-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); }
+.page-sub { font-size:15px; color:var(--ink-3); }
+
+/* ── MAIN ── */
+.main { padding:0 48px 80px; }
+input[type="file"] { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+
+/* ── UPLOAD ZONE ── */
+.upload-zone { background:var(--white); border:2px dashed var(--border); border-radius:20px; padding:56px 40px; text-align:center; transition:border-color .25s, background .25s, box-shadow .25s; margin-bottom:24px; }
+.upload-zone:hover, .upload-zone.drag-on { border-color:var(--red); background:var(--red-light); box-shadow:0 0 0 4px rgba(224,43,32,0.06); }
+.uz-icon { width:64px; height:64px; border-radius:16px; background:var(--bg); border:1.5px solid var(--border); display:grid; place-items:center; font-size:28px; margin:0 auto 20px; transition:all .25s; }
+.upload-zone:hover .uz-icon { background:rgba(224,43,32,.08); border-color:rgba(224,43,32,.3); transform:translateY(-4px); }
+.uz-title { font-size:18px; font-weight:700; letter-spacing:-0.3px; color:var(--ink); margin-bottom:6px; }
+.uz-sub { font-size:13px; color:var(--ink-3); margin-bottom:22px; }
+.uz-btn { background:var(--red); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:600; padding:12px 32px; border:none; border-radius:10px; display:inline-block; cursor:pointer; transition:background .2s; }
+.uz-btn:hover { background:var(--red-hover); }
+.uz-note { margin-top:14px; font-size:12px; color:var(--ink-3); }
+
+/* ── TOOL PANEL ── */
+.tool-panel { display:none; background:var(--white); border:1.5px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:24px; }
+.tool-panel.active { display:block; }
+.panel-header { padding:18px 28px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.panel-file { display:flex; align-items:center; gap:10px; }
+.panel-filename { font-size:14px; font-weight:700; color:var(--ink); }
+.panel-filemeta { font-size:12px; color:var(--ink-3); margin-top:2px; }
+.badge-locked { background:rgba(224,43,32,0.1); color:var(--red); font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; display:flex; align-items:center; gap:4px; }
+.btn-remove { background:transparent; color:var(--ink-3); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:500; padding:7px 14px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; transition:all .2s; }
+.btn-remove:hover { border-color:var(--red); color:var(--red); }
+
+/* ── PASSWORD SECTION ── */
+.password-section { padding:36px 28px; text-align:center; background:var(--bg); }
+.pass-icon { font-size:40px; margin-bottom:16px; }
+.pass-title { font-size:18px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.pass-desc { font-size:13px; color:var(--ink-3); margin-bottom:24px; max-width:400px; margin-left:auto; margin-right:auto; }
+
+.pass-field-wrap { position:relative; max-width:320px; margin:0 auto 12px; }
+.pass-input {
+  width:100%; padding:14px 46px 14px 18px;
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:12px; font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:15px; color:var(--ink); outline:none;
+  transition:border-color .2s, box-shadow .2s; text-align:center;
+}
+.pass-input:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(224,43,32,0.08); }
+.pass-input.error { border-color:#e02020; box-shadow:0 0 0 3px rgba(224,43,32,0.1); }
+
+.eye-btn {
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; font-size:18px;
+  color:var(--ink-3); padding:4px; line-height:1; transition:color .2s;
+}
+.eye-btn:hover { color:var(--ink); }
+
+.error-msg { font-size:13px; color:var(--red); font-weight:500; display:none; margin-top:8px; }
+.error-msg.show { display:block; }
+
+/* ── ACTION ── */
+.unlock-action { padding:20px 28px; border-top:1px solid var(--border); display:flex; align-items:center; gap:14px; background:var(--white); }
+.btn-unlock {
+  background:var(--red); color:#fff; font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:15px; font-weight:700; padding:14px 36px; border:none; border-radius:12px;
+  cursor:pointer; transition:background .2s, transform .15s, box-shadow .2s;
+  display:flex; align-items:center; gap:8px;
+}
+.btn-unlock:hover { background:var(--red-hover); transform:translateY(-2px); box-shadow:0 10px 28px rgba(224,43,32,.28); }
+.btn-unlock:disabled { background:#ccc; cursor:not-allowed; transform:none; box-shadow:none; }
+.unlock-info { font-size:13px; color:var(--ink-3); }
+
+/* ── RESULT ── */
+.result-panel { display:none; background:var(--white); border:1.5px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:24px; }
+.result-panel.active { display:block; }
+.result-header { padding:20px 28px; background:var(--success-bg); border-bottom:1px solid rgba(45,138,78,.15); display:flex; align-items:center; justify-content:space-between; }
+.result-title { font-size:16px; font-weight:700; color:var(--success); display:flex; align-items:center; gap:8px; }
+.btn-dl { background:var(--success); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; padding:12px 28px; border:none; border-radius:10px; cursor:pointer; transition:background .2s, transform .15s; }
+.btn-dl:hover { background:#236e3d; transform:translateY(-1px); }
+.result-body { padding:32px 28px; display:flex; align-items:center; gap:20px; }
+.res-icon { font-size:42px; }
+.res-fname { font-size:16px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.res-fmeta { font-size:13px; color:var(--ink-3); }
+.result-footer { padding:14px 28px; border-top:1px solid var(--border); display:flex; gap:10px; }
+.btn-ghost { background:transparent; color:var(--ink-3); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:500; padding:8px 16px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; transition:all .2s; }
+.btn-ghost:hover { border-color:var(--ink-3); color:var(--ink); }
+
+/* ── HOW IT WORKS ── */
+.how-section { margin-top:48px; background:var(--white); border:1.5px solid var(--border); border-radius:20px; padding:36px 40px; }
+.how-title { font-size:20px; font-weight:700; letter-spacing:-0.5px; color:var(--ink); margin-bottom:28px; }
+.how-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); }
+.how-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+.how-step { text-align:center; }
+.how-num { width:40px; height:40px; border-radius:12px; background:var(--red-light); border:1.5px solid rgba(224,43,32,.2); display:grid; place-items:center; margin:0 auto 12px; font-family:'Instrument Serif',serif; font-style:italic; font-size:18px; color:var(--red); }
+.how-step-title { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.how-step-desc { font-size:13px; color:var(--ink-3); line-height:1.6; }
+
+/* ── OTHER TOOLS ── */
+.other-tools { margin-top:48px; }
+.other-title { font-size:18px; font-weight:700; letter-spacing:-0.4px; color:var(--ink); margin-bottom:20px; }
+.tools-mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.mini-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:18px 16px; text-decoration:none; display:block; transition:border-color .25s, transform .2s, box-shadow .25s; }
+.mini-card:hover { border-color:var(--red); transform:translateY(-3px); box-shadow:0 0 0 3px rgba(224,43,32,0.08); }
+.mini-icon { font-size:22px; margin-bottom:10px; }
+.mini-name { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.mini-desc { font-size:12px; color:var(--ink-3); }
+
+/* ── FOOTER ── */
+footer { border-top:1px solid var(--border); padding:32px 48px; background:var(--white); display:flex; justify-content:space-between; align-items:center; }
+.ft-copy { font-size:12px; color:var(--ink-3); }
+.ft-india span { color:var(--red); }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:28px; right:28px; z-index:9999; background:var(--ink); color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.15); transform:translateY(80px); opacity:0; transition:all .3s ease; max-width:320px; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.success { background:var(--success); }
+.toast.error { background:#c4231a; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav { padding:0 20px; } .nav-links { display:none; }
+  .breadcrumb, .page-hero, .main { padding-left:20px; padding-right:20px; }
+  .how-steps { grid-template-columns:1fr; } .tools-mini-grid { grid-template-columns:repeat(2,1fr); }
+  footer { padding:24px 20px; flex-direction:column; gap:8px; text-align:center; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this.files[0])">
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="favicon.ico" alt="Convertkaro"></div>
+    <div class="logo-name">Convertkaro<span>.in</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#tools">All Tools</a></li>
+    <li><a href="#">How it works</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <label for="fileInput" class="nav-cta" style="cursor:pointer;">Upload PDF to Unlock</label>
+</nav>
+
+<div class="breadcrumb">
+  <a href="index.html">Home</a> <span>›</span> <a href="index.html#tools">All Tools</a> <span>›</span> <strong>Unlock PDF</strong>
+</div>
+
+<div class="page-hero">
+  <div class="tool-icon-big">🔓</div>
+  <div>
+    <h1 class="page-title">Unlock PDF <span class="serif">remove passwords</span></h1>
+    <p class="page-sub">Permanently remove passwords from your PDFs. Fast, secure, and works instantly.</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="upload-zone" id="uploadZone">
+    <div class="uz-icon">🔒</div>
+    <div class="uz-title">Drop your locked PDF here</div>
+    <div class="uz-sub">or click the button to choose a file</div>
+    <label for="fileInput" class="uz-btn" style="display:inline-block;cursor:pointer;">Choose File</label>
+    <div class="uz-note">🔒 File is securely processed by our servers and auto-deleted immediately</div>
+  </div>
+
+  <div class="tool-panel" id="toolPanel">
+    <div class="panel-header">
+      <div class="panel-file">
+        <div>
+          <div class="panel-filename" id="panelFilename">document.pdf</div>
+          <div class="panel-filemeta" id="panelFilemeta">0 KB</div>
+        </div>
+        <span class="badge-locked">🔒 Encrypted</span>
+      </div>
+      <button class="btn-remove" onclick="resetTool()">✕ Remove</button>
+    </div>
+
+    <div class="password-section">
+      <div class="pass-icon">🔑</div>
+      <div class="pass-title">File is password protected</div>
+      <div class="pass-desc">Please enter the correct password to unlock and remove the encryption permanently.</div>
+      
+      <div class="pass-field-wrap">
+        <input type="password" class="pass-input" id="passInput" placeholder="Enter password to unlock" oninput="validateInput()">
+        <button class="eye-btn" type="button" onclick="toggleEye('passInput','eyeBtn')" id="eyeBtn">👁</button>
+      </div>
+      <div class="error-msg" id="passError">Incorrect password. Please try again.</div>
+    </div>
+
+    <div class="unlock-action" id="unlockAction">
+      <button class="btn-unlock" id="unlockBtn" onclick="doUnlock()" disabled>
+        🔓 Unlock & Download PDF
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M10 5l3 3-3 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="unlock-info" id="unlockInfo">Enter password to enable unlocking</div>
+    </div>
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="result-header">
+      <div class="result-title">🔓 PDF unlocked successfully!</div>
+      <button class="btn-dl" onclick="downloadResult()">⬇ Download Unlocked PDF</button>
+    </div>
+    <div class="result-body">
+      <div class="res-icon">📄</div>
+      <div>
+        <div class="res-fname" id="resFilename">document_unlocked.pdf</div>
+        <div class="res-fmeta" id="resFilemeta">Password removed permanently</div>
+      </div>
+    </div>
+    <div class="result-footer">
+      <button class="btn-ghost" onclick="resetTool()">Unlock another PDF</button>
+    </div>
+  </div>
+
+  <div class="how-section">
+    <div class="how-title">How to <span class="serif">unlock a PDF</span></div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-step-title">Upload locked PDF</div>
+        <div class="how-step-desc">Select the password-protected PDF you want to unlock.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-step-title">Enter the password</div>
+        <div class="how-step-desc">Provide the current password. We securely process the file to decrypt it.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-step-title">Download unlocked file</div>
+        <div class="how-step-desc">Click unlock. Your new PDF will be permanently free of passwords.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="other-tools">
+    <div class="other-title">Other free tools</div>
+    <div class="tools-mini-grid">
+      <a href="protect-pdf.html" class="mini-card">
+        <div class="mini-icon">🔒</div>
+        <div class="mini-name">Protect PDF</div>
+        <div class="mini-desc">Add a password to your PDF</div>
+      </a>
+      <a href="split-pdf.html" class="mini-card">
+        <div class="mini-icon">✂️</div>
+        <div class="mini-name">Split PDF</div>
+        <div class="mini-desc">Break a PDF into separate files</div>
+      </a>
+      <a href="merge-pdf.html" class="mini-card">
+        <div class="mini-icon">🔗</div>
+        <div class="mini-name">Merge PDF</div>
+        <div class="mini-desc">Combine multiple PDFs into one</div>
+      </a>
+      <a href="compress-pdf.html" class="mini-card">
+        <div class="mini-icon">📦</div>
+        <div class="mini-name">Compress PDF</div>
+        <div class="mini-desc">Reduce PDF file size</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="ft-copy">© 2026 Convertkaro.in — All rights reserved.</div>
+  <div class="ft-india">Made with <span>♥</span> in India 🇮🇳</div>
+</footer>
+
+<script>
+// ── State ──
+let selectedPdfFile = null;
+let resultName = 'document_unlocked.pdf';
+let resultBlob = null;
+
+// ── Drag & Drop ──
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-on'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-on'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-on');
+  const f = e.dataTransfer.files[0];
+  if(!f || f.type !== 'application/pdf') { showToast('Please drop a valid PDF file', 'error'); return; }
+  handleFile(f);
+});
+
+// ── Handle File ──
+function handleFile(f) {
+  if(!f || f.type !== 'application/pdf') return;
+  showToast('Loading PDF...');
+  
+  selectedPdfFile = f;
+  resultName = f.name.replace(/\.pdf$/i, '') + '_unlocked.pdf';
+
+  document.getElementById('panelFilename').textContent = f.name;
+  document.getElementById('panelFilemeta').textContent = formatSize(f.size);
+  
+  document.getElementById('toolPanel').classList.add('active');
+  document.getElementById('uploadZone').style.display = 'none';
+  
+  setTimeout(() => document.getElementById('passInput').focus(), 100);
+  showToast('Encrypted PDF loaded', 'success');
+}
+
+// ── Input Validation ──
+function validateInput() {
+  const val = document.getElementById('passInput').value;
+  const btn = document.getElementById('unlockBtn');
+  const info = document.getElementById('unlockInfo');
+  
+  document.getElementById('passError').classList.remove('show');
+  document.getElementById('passInput').classList.remove('error');
+
+  if(val.length > 0) {
+    btn.disabled = false;
+    info.textContent = 'Ready to remove password';
+  } else {
+    btn.disabled = true;
+    info.textContent = 'Enter password to enable unlocking';
+  }
+}
+
+function toggleEye(inputId, btnId) {
+  const inp = document.getElementById(inputId), btn = document.getElementById(btnId);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+// ── BACKEND UNLOCK LOGIC ──
+async function doUnlock() {
+  if(!selectedPdfFile) return;
+  const password = document.getElementById('passInput').value;
+  
+  const btn = document.getElementById('unlockBtn');
+  
+  btn.innerHTML = 'Unlocking from Server...';
+  btn.disabled = true;
+
+  try {
+    const formData = new FormData();
+    formData.append('pdfFile', selectedPdfFile);
+    formData.append('password', password);
+
+    // Backend Request (Update this URL when deploying server to Render.com)
+    const response = await fetch('http://localhost:3000/api/unlock', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || 'Server processing failed');
+    }
+    
+    // Receive decrypted file
+    const unlockedBytes = await response.arrayBuffer();
+    resultBlob = new Blob([unlockedBytes], { type: 'application/pdf' });
+    
+    document.getElementById('toolPanel').classList.remove('active');
+    
+    document.getElementById('resFilename').textContent = resultName;
+    document.getElementById('resFilemeta').textContent = formatSize(resultBlob.size) + ' · Unlocked';
+    
+    document.getElementById('resultPanel').classList.add('active');
+    document.getElementById('resultPanel').scrollIntoView({behavior:'smooth', block:'start'});
+    
+    downloadResult();
+    showToast('Password removed successfully!', 'success');
+
+  } catch(err) {
+    btn.innerHTML = '🔓 Unlock & Download PDF <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M10 5l3 3-3 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    btn.disabled = false;
+
+    document.getElementById('passError').textContent = 'Incorrect password or file is corrupted.';
+    document.getElementById('passError').classList.add('show');
+    document.getElementById('passInput').classList.add('error');
+    
+    const inputWrap = document.querySelector('.pass-field-wrap');
+    inputWrap.style.transform = 'translateX(-5px)';
+    setTimeout(() => inputWrap.style.transform = 'translateX(5px)', 100);
+    setTimeout(() => inputWrap.style.transform = 'translateX(-5px)', 200);
+    setTimeout(() => inputWrap.style.transform = 'translateX(0)', 300);
+    
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+// ── Download Helpers ──
+function downloadResult() { if(resultBlob) triggerDownload(resultBlob, resultName); }
+
+function triggerDownload(blob, name) {
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+// ── Reset ──
+function resetTool() {
+  selectedPdfFile = null; resultBlob = null;
+  document.getElementById('toolPanel').classList.remove('active');
+  document.getElementById('resultPanel').classList.remove('active');
+  document.getElementById('uploadZone').style.display = '';
+  
+  document.getElementById('passInput').value = '';
+  document.getElementById('passInput').classList.remove('error');
+  document.getElementById('passError').classList.remove('show');
+  document.getElementById('fileInput').value = '';
+  
+  document.getElementById('unlockBtn').innerHTML = '🔓 Unlock & Download PDF <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M10 5l3 3-3 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  document.getElementById('unlockBtn').disabled = true;
+  document.getElementById('unlockInfo').textContent = 'Enter password to enable unlocking';
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function formatSize(b) {
+  if(b<1024) return b+' B';
+  if(b<1048576) return (b/1024).toFixed(1)+' KB';
+  return (b/1048576).toFixed(2)+' MB';
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (type ? ' '+type : '');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

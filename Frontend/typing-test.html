@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typing & Spelling Master — Convertkaro.in</title>
+<meta name="description" content="Improve your typing speed and memorize spellings for competitive exams. 3-Minute Typing Tests and Single Word modes.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── BASIC SETUP ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+:root { --bg: #f8f7f4; --white: #ffffff; --red: #e02b20; --red-hover: #c4231a; --red-light: rgba(224,43,32,0.07); --ink: #141414; --ink-2: #3d3d3d; --ink-3: #888; --border: #e4e2dc; --success: #2d8a4e; --success-bg: #edf7f1; --font-mono: 'JetBrains Mono', monospace; }
+body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+
+/* Nav & Breadcrumb */
+nav { position:fixed; top:0; left:0; right:0; z-index:100; height:68px; display:flex; align-items:center; justify-content:space-between; padding:0 48px; background:rgba(248,247,244,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+.logo { display:flex; align-items:center; gap:9px; text-decoration:none; } .logo-mark img { width:32px; height:32px; object-fit:cover; border-radius:8px; }
+.logo-name { font-size:17px; font-weight:700; color:var(--ink); } .logo-name span { color:var(--red); }
+.nav-links { display:flex; gap:32px; list-style:none; } .nav-links a { font-size:14px; font-weight:500; color:var(--ink-3); text-decoration:none; }
+.breadcrumb { padding:88px 48px 0; font-size:13px; color:var(--ink-3); } .breadcrumb a { color:var(--ink-3); text-decoration:none; }
+
+/* Hero */
+.page-hero { padding:32px 48px 24px; display:flex; align-items:center; gap:20px; }
+.tool-icon-big { width:64px; height:64px; border-radius:18px; background:var(--red-light); border:1.5px solid rgba(224,43,32,0.2); display:grid; place-items:center; font-size:30px; }
+.page-title { font-size:clamp(26px,4vw,38px); font-weight:800; color:var(--ink); margin-bottom:6px; } .page-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); }
+.page-sub { font-size:15px; color:var(--ink-3); }
+.student-badge-hero { display:inline-block; background:#fff2e5; color:#e67300; font-size:12px; font-weight:700; padding:4px 10px; border-radius:6px; margin-bottom:8px; border:1px solid #ffcc99; }
+
+.main { padding:0 48px 80px; max-width: 1000px; margin: 0 auto; } 
+
+/* ── MODE SWITCHER TABS ── */
+.main-tabs { display:flex; gap:12px; margin-bottom:24px; background:var(--white); padding:8px; border-radius:16px; border:1.5px solid var(--border); max-width:600px; margin-left:auto; margin-right:auto; }
+.m-tab-btn { flex:1; padding:14px; font-size:15px; font-weight:700; font-family:inherit; color:var(--ink-3); background:transparent; border:none; border-radius:12px; cursor:pointer; transition:all 0.2s; }
+.m-tab-btn.active { background:var(--ink); color:var(--white); }
+
+/* ── TYPING WORKSPACE ── */
+.workspace { background: var(--white); border: 1.5px solid var(--border); border-radius: 20px; padding: 40px; box-shadow: 0 12px 30px rgba(0,0,0,0.03); }
+
+/* Stats Bar */
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+.stat-box { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; transition: 0.3s;}
+.stat-box.active-timer { border-color: var(--red); background: var(--red-light); }
+.stat-num { font-size: 32px; font-weight: 800; color: var(--ink); line-height: 1; margin-bottom: 4px; font-family: var(--font-mono); }
+.stat-num.highlight { color: var(--red); }
+.stat-label { font-size: 12px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Display Box (Dynamic based on mode) */
+.display-box { background: var(--bg); border: 2px dashed var(--border); border-radius: 16px; padding: 30px; font-family: var(--font-mono); color: var(--ink-2); margin-bottom: 24px; position: relative; user-select: none; }
+
+/* Mode 1: Single Word */
+.display-single { font-size: 48px; text-align: center; font-weight: 700; height: 160px; display: flex; align-items: center; justify-content: center; letter-spacing: 2px;}
+/* Mode 2: Paragraph */
+.display-para { font-size: 22px; line-height: 1.8; height: 180px; overflow-y: hidden; text-align: left; scroll-behavior: smooth;}
+.display-para::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(to bottom, rgba(248,247,244,0), var(--bg)); pointer-events:none;}
+
+.word { margin-right: 12px; display: inline-block; transition: 0.1s; border-radius: 6px; padding: 0 2px;}
+.word.current { background: var(--ink); color: var(--white); }
+.word.correct { color: var(--success); }
+.word.incorrect { color: var(--red); text-decoration: underline; background: var(--red-light);}
+
+/* Input Area */
+.input-area { display: flex; gap: 16px; }
+.typing-input { flex-grow: 1; padding: 20px 24px; border: 2px solid var(--border); border-radius: 12px; font-family: var(--font-mono); font-size: 20px; outline: none; transition: 0.2s; background: var(--white); color: var(--ink); text-align: center;}
+.typing-input:focus { border-color: var(--red); box-shadow: 0 0 0 4px var(--red-light); }
+.typing-input:disabled { background: var(--bg); color: var(--ink-3); cursor: not-allowed; }
+
+.btn-restart { background: var(--ink); color: #fff; border: none; border-radius: 12px; width: 68px; display: grid; place-items: center; font-size: 24px; cursor: pointer; transition: 0.2s; }
+.btn-restart:hover { transform: translateY(-2px); background: var(--ink-2); }
+
+/* ── RESULTS MODAL (Detailed Analysis) ── */
+.result-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; display: none; place-items: center; backdrop-filter: blur(5px); padding: 20px;}
+.result-card { background: var(--white); padding: 40px; border-radius: 20px; max-width: 800px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; animation: slideUp 0.3s ease; }
+.result-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1.5px solid var(--border);}
+.result-header h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px;}
+.score-grid { display: flex; justify-content: center; gap: 40px; margin-top: 20px;}
+.score-item { text-align: center; }
+.score-val { font-size: 48px; font-weight: 800; color: var(--red); font-family: var(--font-mono); line-height: 1;}
+.score-label { font-size: 13px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; margin-top: 8px;}
+
+/* Detailed Word Breakdown */
+.detailed-analysis { flex-grow: 1; overflow-y: auto; background: var(--bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; font-family: var(--font-mono); font-size: 16px; line-height: 2;}
+.res-word { display: inline-block; margin-right: 12px; margin-bottom: 8px; padding: 4px 8px; border-radius: 6px; font-weight: 500;}
+.res-word.correct { background: var(--success-bg); color: var(--success); border: 1px solid rgba(45,138,78,0.2);}
+.res-word.wrong { background: var(--red-light); color: var(--red); border: 1px solid rgba(224,43,32,0.2); text-decoration: line-through;}
+.res-word.expected { background: transparent; color: var(--ink-3); font-size: 14px; margin-left: -8px; margin-right: 12px;}
+
+.btn-primary { background: var(--red); color: white; border: none; padding: 16px 32px; font-size: 16px; font-weight: 700; border-radius: 12px; cursor: pointer; width: 100%; transition: 0.2s; }
+.btn-primary:hover { background: var(--red-hover); transform: translateY(-2px); }
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+@media(max-width:768px){ .stats-bar { grid-template-columns: 1fr 1fr; } nav { padding:0 20px;} .nav-links{display:none;} .main{padding:0 20px 80px;} .display-para{font-size:18px;} .score-grid{gap:20px;} .score-val{font-size:36px;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="favicon.ico" alt="Convertkaro"></div>
+    <div class="logo-name">Convertkaro<span>.in</span></div>
+  </a>
+  <ul class="nav-links"><li><a href="index.html#tools">All Tools</a></li></ul>
+</nav>
+
+<div class="breadcrumb"><a href="index.html">Home</a> › <strong>Typing Master</strong></div>
+
+<div class="page-hero">
+  <div class="tool-icon-big">⌨️</div>
+  <div>
+    <div class="student-badge-hero">👨‍🎓 Skill Builder</div>
+    <h1 class="page-title">Spelling & Typing <span class="serif">Master</span></h1>
+    <p class="page-sub">Memorize difficult spellings or take a full 3-minute professional typing test.</p>
+  </div>
+</div>
+
+<div class="main">
+  
+  <div class="main-tabs">
+    <button class="m-tab-btn active" id="btnModeSpell" onclick="switchMode('spell')">🧠 Spell Memorizer (1 Min)</button>
+    <button class="m-tab-btn" id="btnModeType" onclick="switchMode('type')">⏱️ 3-Min Typing Tester</button>
+  </div>
+
+  <div class="workspace">
+    <div class="stats-bar">
+      <div class="stat-box" id="timerBox">
+        <div class="stat-num highlight" id="timeLeft">60</div>
+        <div class="stat-label">Seconds</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="wpmDisplay">0</div>
+        <div class="stat-label">WPM</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="accuracyDisplay">100</div>
+        <div class="stat-label">% Accuracy</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="errorsDisplay" style="color:var(--red);">0</div>
+        <div class="stat-label">Errors</div>
+      </div>
+    </div>
+
+    <div class="display-box display-single" id="displayBox">
+      </div>
+
+    <div class="input-area">
+      <input type="text" id="typeInput" class="typing-input" placeholder="Type here and press Space..." autocomplete="off" spellcheck="false">
+      <button class="btn-restart" onclick="initGame()" title="Restart Test">↻</button>
+    </div>
+  </div>
+</div>
+
+<div class="result-overlay" id="resultModal">
+  <div class="result-card">
+    <div class="result-header">
+      <h2 id="resTitle">Test Complete! 🏆</h2>
+      <div class="score-grid">
+        <div class="score-item">
+          <div class="score-val" id="finalWPM">0</div>
+          <div class="score-label">WPM</div>
+        </div>
+        <div class="score-item">
+          <div class="score-val" id="finalAccuracy" style="color:var(--success);">0%</div>
+          <div class="score-label">Accuracy</div>
+        </div>
+        <div class="score-item">
+          <div class="score-val" id="finalErrors" style="color:var(--ink);">0</div>
+          <div class="score-label">Total Errors</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="font-weight:700; color:var(--ink); margin-bottom:12px; font-size:15px;">Detailed Word Analysis:</div>
+    <div class="detailed-analysis" id="detailedAnalysisBox">
+      </div>
+    
+    <button class="btn-primary" onclick="initGame()">Try Again / Next Test</button>
+  </div>
+</div>
+
+<script>
+// --- DATABASES ---
+// Hard words for spelling memorizer
+const spellDictionary = [
+  "accommodation", "necessary", "definitely", "embarrass", "fluorescent", "maintenance", 
+  "pronunciation", "recommend", "separate", "successful", "accessible", "accidentally", 
+  "committee", "discipline", "environment", "fascinating", "government", "independent", 
+  "millennium", "occasionally", "occurrence", "privilege", "questionnaire", "rhythm",
+  "tomorrow", "unnecessary", "vacuum", "weather", "whether", "weird", "acquire", "apparent"
+];
+
+// 10 Paragraphs for 3-Min Test (Long enough so they don't run out)
+const paragraphs = [
+  "Technology is an essential part of our lives today. We use it for communication, work, and entertainment. In the modern era, knowing how to type efficiently is not just a skill but a requirement for most professional jobs. The rapid advancement of computers has transformed how we process information. A fast typing speed allows you to express your thoughts without the keyboard becoming a bottleneck. Competitive exams often test this ability because it reflects your overall computer literacy and mental agility under pressure. Continuous practice is the only proven method to improve both your accuracy and your words per minute. Always focus on accuracy first, as speed will naturally follow once your muscle memory is established.",
+  
+  "The history of the universe is a vast and complex subject that has fascinated scientists for centuries. From the Big Bang to the formation of stars and galaxies, every event has played a crucial role in shaping the cosmos we observe today. Earth, our home planet, is just a tiny speck in this infinite expanse. Yet, it harbors an incredible diversity of life forms, each adapted to survive in its unique environment. Understanding our place in the universe requires both imagination and rigorous scientific inquiry. As we look up at the night sky, we are reminded of the boundless mysteries that still await discovery. Human curiosity continues to drive space exploration and technological innovation.",
+  
+  "Reading books is one of the most enriching habits a person can develop. It opens up new worlds, introduces diverse perspectives, and expands our vocabulary. Whether it is fiction that transports us to magical realms or non-fiction that educates us about history and science, every book holds the potential to change our mindset. In today's digital age, where attention spans are shrinking due to short-form content, sitting down with a good book requires discipline. However, the mental clarity and focus gained from deep reading are unparalleled. It improves cognitive function and reduces stress. Making time to read every day is an investment in your personal and intellectual growth.",
+  
+  "Effective communication is the cornerstone of successful relationships, both personal and professional. It involves not just speaking clearly, but also listening actively to understand the other person's perspective. Non-verbal cues, such as body language and eye contact, play a significant role in conveying our true intentions. Misunderstandings often arise when we make assumptions instead of asking clarifying questions. Developing emotional intelligence allows us to navigate difficult conversations with empathy and respect. In the workplace, clear communication fosters teamwork, boosts morale, and increases productivity. Mastering this skill takes time and self-awareness, but the benefits it brings to every aspect of life are immeasurable.",
+  
+  "Climate change is arguably the most pressing global challenge of our time. The rising average temperatures, driven largely by human activities such as burning fossil fuels and deforestation, are causing severe environmental disruptions. Melting ice caps, rising sea levels, and extreme weather events are becoming increasingly common. Addressing this crisis requires immediate and coordinated action from governments, corporations, and individuals worldwide. Transitioning to renewable energy sources, adopting sustainable agricultural practices, and reducing plastic waste are crucial steps in mitigating the impact. Protecting our planet's ecosystems is not just about saving wildlife; it is about ensuring a habitable and healthy future for generations to come."
+]; // Added 5 solid long ones, they will loop if needed.
+
+// --- GAME STATE ---
+let currentMode = 'spell'; // 'spell' or 'type'
+let timeLimit = 60;
+let timeLeft = timeLimit;
+let timer = null;
+let isPlaying = false;
+
+let wordsArray = [];
+let currentWordIndex = 0;
+let totalKeystrokes = 0;
+let correctKeystrokes = 0;
+let errors = 0;
+let wordHistory = []; // Tracks { expected: "word", typed: "wrod", isCorrect: false }
+
+// DOM Elements
+const typeInput = document.getElementById('typeInput');
+const displayBox = document.getElementById('displayBox');
+const timeDisplay = document.getElementById('timeLeft');
+const wpmDisplay = document.getElementById('wpmDisplay');
+const accuracyDisplay = document.getElementById('accuracyDisplay');
+const errorsDisplay = document.getElementById('errorsDisplay');
+const timerBox = document.getElementById('timerBox');
+const resultModal = document.getElementById('resultModal');
+const detailedAnalysisBox = document.getElementById('detailedAnalysisBox');
+
+// --- MODE SWITCHING ---
+function switchMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.m-tab-btn').forEach(btn => btn.classList.remove('active'));
+  
+  if(mode === 'spell') {
+    document.getElementById('btnModeSpell').classList.add('active');
+    timeLimit = 60; // 1 Min for Spelling
+    displayBox.className = 'display-box display-single';
+    typeInput.style.textAlign = 'center';
+  } else {
+    document.getElementById('btnModeType').classList.add('active');
+    timeLimit = 180; // 3 Mins for Typing Tester
+    displayBox.className = 'display-box display-para';
+    typeInput.style.textAlign = 'left';
+  }
+  
+  initGame();
+}
+
+// --- INITIALIZATION ---
+function initGame() {
+  clearInterval(timer);
+  isPlaying = false;
+  timeLeft = timeLimit;
+  currentWordIndex = 0;
+  totalKeystrokes = 0;
+  correctKeystrokes = 0;
+  errors = 0;
+  wordHistory = [];
+
+  timeDisplay.innerText = timeLeft;
+  wpmDisplay.innerText = 0;
+  accuracyDisplay.innerText = 100;
+  errorsDisplay.innerText = 0;
+  
+  typeInput.value = '';
+  typeInput.disabled = false;
+  timerBox.classList.remove('active-timer');
+  resultModal.style.display = 'none';
+
+  generateContent();
+  typeInput.focus();
+}
+
+function generateContent() {
+  wordsArray = [];
+  if(currentMode === 'spell') {
+    // Pick 50 random hard words
+    for(let i=0; i<50; i++) {
+      wordsArray.push(spellDictionary[Math.floor(Math.random() * spellDictionary.length)]);
+    }
+    displayBox.innerText = wordsArray[0]; // Show first word
+  } 
+  else {
+    // Pick a random paragraph and split into words
+    const randomPara = paragraphs[Math.floor(Math.random() * paragraphs.length)];
+    // Add multiple paragraphs to ensure they don't run out in 3 mins
+    const fullText = randomPara + " " + paragraphs[Math.floor(Math.random() * paragraphs.length)];
+    wordsArray = fullText.split(/\s+/);
+    
+    displayBox.innerHTML = '';
+    wordsArray.forEach((w, i) => {
+      const span = document.createElement('span');
+      span.className = i === 0 ? 'word current' : 'word';
+      span.innerText = w;
+      displayBox.appendChild(span);
+    });
+  }
+}
+
+// --- GAMEPLAY MECHANICS ---
+function startTimer() {
+  if (isPlaying) return;
+  isPlaying = true;
+  timerBox.classList.add('active-timer');
+  
+  timer = setInterval(() => {
+    timeLeft--;
+    timeDisplay.innerText = timeLeft;
+    calculateLiveStats();
+
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+}
+
+function calculateLiveStats() {
+  const timeElapsed = timeLimit - timeLeft;
+  if (timeElapsed > 0) {
+    let currentWpm = Math.round(((correctKeystrokes / 5) / timeElapsed) * 60);
+    wpmDisplay.innerText = currentWpm;
+  }
+  let accuracy = totalKeystrokes > 0 ? Math.round((correctKeystrokes / totalKeystrokes) * 100) : 100;
+  accuracyDisplay.innerText = accuracy;
+  errorsDisplay.innerText = errors;
+}
+
+// Input Listener
+typeInput.addEventListener('input', (e) => {
+  if(!isPlaying && timeLeft === timeLimit) startTimer();
+
+  const typedValue = typeInput.value;
+  const targetWord = wordsArray[currentWordIndex];
+
+  if(e.inputType !== 'deleteContentBackward') totalKeystrokes++;
+
+  // Space pressed -> Evaluate Word
+  if (typedValue.endsWith(' ')) {
+    const typedWord = typedValue.trim();
+    const isCorrect = typedWord === targetWord;
+    
+    if (isCorrect) {
+      correctKeystrokes += typedWord.length + 1; 
+    } else {
+      errors++;
+    }
+
+    // Save to history for detailed result screen
+    wordHistory.push({ expected: targetWord, typed: typedWord, isCorrect: isCorrect });
+
+    // Handle UI based on Mode
+    if (currentMode === 'spell') {
+      currentWordIndex++;
+      if(currentWordIndex < wordsArray.length) {
+        displayBox.innerText = wordsArray[currentWordIndex]; // Show next single word
+      } else {
+        endGame(); // Finished all words
+      }
+    } 
+    else {
+      // Paragraph Mode UI Updates
+      const wordElements = displayBox.querySelectorAll('.word');
+      const currentEl = wordElements[currentWordIndex];
+      
+      currentEl.classList.remove('current');
+      currentEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+      
+      currentWordIndex++;
+      
+      if(currentWordIndex < wordsArray.length) {
+        const nextEl = wordElements[currentWordIndex];
+        nextEl.classList.add('current');
+        
+        // 🚨 UX FIX: Smooth Auto-Scroll to keep active word in view
+        nextEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        endGame();
+      }
+    }
+    
+    typeInput.value = ''; // Clear input
+    calculateLiveStats();
+  }
+});
+
+// --- RESULTS GENERATION ---
+function endGame() {
+  clearInterval(timer);
+  isPlaying = false;
+  typeInput.disabled = true;
+  timerBox.classList.remove('active-timer');
+  
+  // Set basic stats
+  document.getElementById('finalWPM').innerText = wpmDisplay.innerText;
+  document.getElementById('finalAccuracy').innerText = accuracyDisplay.innerText + '%';
+  document.getElementById('finalErrors').innerText = errors;
+  
+  document.getElementById('resTitle').innerText = currentMode === 'spell' ? "Spelling Test Complete! 🧠" : "Typing Test Complete! ⏱️";
+
+  // Build Detailed Word Breakdown HTML
+  let breakdownHTML = '';
+  wordHistory.forEach(item => {
+    if(item.isCorrect) {
+      breakdownHTML += `<span class="res-word correct">${item.expected}</span>`;
+    } else {
+      // Show what they typed wrong, and what it should have been
+      const wrongText = item.typed === "" ? "[skipped]" : item.typed;
+      breakdownHTML += `<span class="res-word wrong">${wrongText}</span>`;
+      breakdownHTML += `<span class="res-word expected">(${item.expected})</span>`;
+    }
+  });
+  
+  detailedAnalysisBox.innerHTML = breakdownHTML;
+  resultModal.style.display = 'grid';
+}
+
+// Start on load
+window.onload = () => switchMode('spell');
+</script>
+</body>
+</html>

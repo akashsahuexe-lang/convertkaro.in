@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protect PDF with Password — Convertkaro.in</title>
+<meta name="description" content="Add a strong password to your PDF files securely and for free.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+/* Wahi same CSS jo baaki files mein hai (chhoti aur crisp) */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+:root { --bg: #f8f7f4; --white: #ffffff; --red: #e02b20; --red-hover: #c4231a; --red-light: rgba(224,43,32,0.07); --ink: #141414; --ink-2: #3d3d3d; --ink-3: #888; --border: #e4e2dc; --success: #2d8a4e; --success-bg: #edf7f1; }
+body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+
+/* ── NAV & BASIC STYLES ── */
+nav { position:fixed; top:0; left:0; right:0; z-index:100; height:68px; display:flex; align-items:center; justify-content:space-between; padding:0 48px; background:rgba(248,247,244,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+.logo { display:flex; align-items:center; gap:9px; text-decoration:none; } .logo-mark img { width:32px; height:32px; object-fit:cover; border-radius:8px; }
+.logo-name { font-size:17px; font-weight:700; color:var(--ink); } .logo-name span { color:var(--red); }
+.nav-links { display:flex; gap:32px; list-style:none; } .nav-links a { font-size:14px; font-weight:500; color:var(--ink-3); text-decoration:none; }
+.breadcrumb { padding:88px 48px 0; font-size:13px; color:var(--ink-3); } .breadcrumb a { color:var(--ink-3); text-decoration:none; } .breadcrumb strong { color:var(--ink-2); font-weight:500; }
+.page-hero { padding:32px 48px 40px; display:flex; align-items:center; gap:20px; } .tool-icon-big { width:64px; height:64px; border-radius:18px; background:var(--red-light); border:1.5px solid rgba(224,43,32,0.2); display:grid; place-items:center; font-size:30px; }
+.page-title { font-size:clamp(26px,4vw,38px); font-weight:800; color:var(--ink); margin-bottom:6px; } .page-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); } .page-sub { font-size:15px; color:var(--ink-3); }
+.main { padding:0 48px 80px; } input[type="file"] { display:none; }
+
+/* ── UPLOAD ZONE ── */
+.upload-zone { background:var(--white); border:2px dashed var(--border); border-radius:20px; padding:56px 40px; text-align:center; margin-bottom:24px; transition:all .2s; }
+.upload-zone:hover { border-color:var(--red); background:var(--red-light); }
+.uz-icon { width:64px; height:64px; border-radius:16px; background:var(--bg); border:1.5px solid var(--border); display:grid; place-items:center; font-size:28px; margin:0 auto 20px; }
+.uz-title { font-size:18px; font-weight:700; color:var(--ink); margin-bottom:6px; } .uz-sub { font-size:13px; color:var(--ink-3); margin-bottom:22px; }
+.uz-btn { background:var(--red); color:#fff; font-size:14px; font-weight:600; padding:12px 32px; border-radius:10px; cursor:pointer; }
+
+/* ── TOOL PANEL ── */
+.tool-panel { display:none; background:var(--white); border:1.5px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:24px; }
+.tool-panel.active { display:block; }
+.panel-header { padding:18px 28px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.panel-filename { font-size:14px; font-weight:700; } .panel-filemeta { font-size:12px; color:var(--ink-3); }
+.btn-remove { background:transparent; font-size:13px; font-weight:500; padding:7px 14px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; }
+
+.password-section { padding:36px 28px; text-align:center; background:var(--bg); }
+.pass-field-wrap { position:relative; max-width:320px; margin:0 auto 12px; }
+.pass-input { width:100%; padding:14px 46px 14px 18px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; text-align:center; outline:none; }
+.pass-input:focus { border-color:var(--red); }
+.eye-btn { position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:18px; }
+
+.unlock-action { padding:20px 28px; border-top:1px solid var(--border); display:flex; align-items:center; gap:14px; background:var(--white); }
+.btn-unlock { background:var(--red); color:#fff; font-size:15px; font-weight:700; padding:14px 36px; border:none; border-radius:12px; cursor:pointer; }
+.btn-unlock:disabled { background:#ccc; cursor:not-allowed; }
+
+/* ── RESULT PANEL ── */
+.result-panel { display:none; background:var(--white); border:1.5px solid var(--border); border-radius:20px; margin-bottom:24px; overflow:hidden; }
+.result-panel.active { display:block; }
+.result-header { padding:20px 28px; background:var(--success-bg); border-bottom:1px solid rgba(45,138,78,.15); display:flex; justify-content:space-between; }
+.result-title { font-size:16px; font-weight:700; color:var(--success); }
+.btn-dl { background:var(--success); color:#fff; font-size:14px; font-weight:700; padding:12px 28px; border:none; border-radius:10px; cursor:pointer; }
+.result-body { padding:32px 28px; display:flex; align-items:center; gap:20px; }
+.res-fname { font-size:16px; font-weight:700; } .res-fmeta { font-size:13px; color:var(--ink-3); }
+.toast { position:fixed; bottom:28px; right:28px; background:var(--success); color:#fff; padding:12px 20px; border-radius:10px; opacity:0; transform:translateY(80px); transition:all .3s; }
+.toast.show { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this.files[0])">
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="favicon.ico" alt="Convertkaro"></div>
+    <div class="logo-name">Convertkaro<span>.in</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#tools">All Tools</a></li>
+  </ul>
+</nav>
+
+<div class="breadcrumb"><a href="index.html">Home</a> › <strong>Protect PDF</strong></div>
+
+<div class="page-hero">
+  <div class="tool-icon-big">🔒</div>
+  <div>
+    <h1 class="page-title">Protect PDF <span class="serif">add password</span></h1>
+    <p class="page-sub">Encrypt your PDF with a password to keep sensitive data safe.</p>
+  </div>
+</div>
+
+<div class="main">
+  <div class="upload-zone" id="uploadZone">
+    <div class="uz-icon">📄</div>
+    <div class="uz-title">Drop your PDF here</div>
+    <div class="uz-sub">Select the file you want to protect</div>
+    <label for="fileInput" class="uz-btn" style="display:inline-block;">Choose File</label>
+  </div>
+
+  <div class="tool-panel" id="toolPanel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-filename" id="panelFilename">document.pdf</div>
+        <div class="panel-filemeta" id="panelFilemeta">0 KB</div>
+      </div>
+      <button class="btn-remove" onclick="resetTool()">✕ Remove</button>
+    </div>
+
+    <div class="password-section">
+      <h2 style="font-size:18px; margin-bottom:8px;">Set a strong password</h2>
+      <p style="font-size:13px; color:#888; margin-bottom:20px;">This password will be required to open the PDF.</p>
+      <div class="pass-field-wrap">
+        <input type="password" class="pass-input" id="passInput" placeholder="Enter new password" oninput="validateInput()">
+        <button class="eye-btn" onclick="toggleEye()">👁</button>
+      </div>
+    </div>
+
+    <div class="unlock-action">
+      <button class="btn-unlock" id="protectBtn" onclick="doProtect()" disabled>🔒 Protect & Download</button>
+      <span style="font-size:13px; color:#888;" id="btnInfo">Enter password to enable</span>
+    </div>
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="result-header">
+      <div class="result-title">🔒 PDF Protected Successfully!</div>
+      <button class="btn-dl" onclick="downloadResult()">⬇ Download Secure PDF</button>
+    </div>
+    <div class="result-body">
+      <div style="font-size:42px;">📄</div>
+      <div>
+        <div class="res-fname" id="resFilename">protected_file.pdf</div>
+        <div class="res-fmeta">Encrypted with AES-256 bit security</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedFile = null, resultBlob = null, resultName = '';
+
+function handleFile(f) {
+  if(!f || f.type !== 'application/pdf') return;
+  selectedFile = f;
+  resultName = 'locked_' + f.name;
+  document.getElementById('panelFilename').textContent = f.name;
+  document.getElementById('panelFilemeta').textContent = (f.size/1024).toFixed(1) + ' KB';
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('toolPanel').classList.add('active');
+  document.getElementById('passInput').focus();
+}
+
+function validateInput() {
+  const val = document.getElementById('passInput').value;
+  const btn = document.getElementById('protectBtn');
+  if(val.length > 0) { btn.disabled = false; document.getElementById('btnInfo').innerText = "Ready to protect"; } 
+  else { btn.disabled = true; document.getElementById('btnInfo').innerText = "Enter password to enable"; }
+}
+
+function toggleEye() {
+  const inp = document.getElementById('passInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+async function doProtect() {
+  const password = document.getElementById('passInput').value;
+  const btn = document.getElementById('protectBtn');
+  btn.innerHTML = 'Locking...'; btn.disabled = true;
+
+  try {
+    const formData = new FormData();
+    formData.append('pdfFile', selectedFile);
+    formData.append('password', password);
+
+    // CALLING OUR NEW BACKEND ROUTE
+    const response = await fetch('http://localhost:3000/api/protect', { method: 'POST', body: formData });
+    
+    if (!response.ok) throw new Error('Failed to protect file');
+    
+    const bytes = await response.arrayBuffer();
+    resultBlob = new Blob([bytes], { type: 'application/pdf' });
+    
+    document.getElementById('toolPanel').classList.remove('active');
+    document.getElementById('resFilename').textContent = resultName;
+    document.getElementById('resultPanel').classList.add('active');
+    
+    downloadResult();
+    const t = document.getElementById('toast'); t.textContent = "File Protected!"; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 3000);
+
+  } catch(err) {
+    btn.innerHTML = '🔒 Protect & Download'; btn.disabled = false;
+    alert("Error protecting PDF!");
+  }
+}
+
+function downloadResult() {
+  if(resultBlob){
+    const url = URL.createObjectURL(resultBlob);
+    const a = document.createElement('a'); a.href = url; a.download = resultName;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+}
+
+function resetTool() {
+  selectedFile = null; resultBlob = null;
+  document.getElementById('toolPanel').classList.remove('active');
+  document.getElementById('resultPanel').classList.remove('active');
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('passInput').value = '';
+  document.getElementById('protectBtn').disabled = true;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extract Text from Image (OCR) — Convertkaro.in</title>
+<meta name="description" content="Free online OCR tool to extract text from images in English and Hindi. 100% private, works in your browser.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+:root {
+  --bg: #f8f7f4; --white: #ffffff; --red: #e02b20; --red-hover: #c4231a;
+  --red-light: rgba(224,43,32,0.07); --ink: #141414; --ink-2: #3d3d3d;
+  --ink-3: #888; --border: #e4e2dc; --radius: 16px;
+  --success: #2d8a4e; --success-bg: #edf7f1;
+}
+
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100; height:68px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 48px; background:rgba(248,247,244,0.92);
+  backdrop-filter:blur(20px); border-bottom:1px solid var(--border);
+}
+.logo { display:flex; align-items:center; gap:9px; text-decoration:none; }
+.logo-mark { width:32px; height:32px; border-radius:8px; overflow:hidden; display:grid; place-items:center; flex-shrink:0; } .logo-mark img { width:32px; height:32px; object-fit:cover; border-radius:8px; }
+.logo-name { font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-0.4px; }
+.logo-name span { color:var(--red); }
+.nav-links { display:flex; gap:32px; list-style:none; }
+.nav-links a { font-size:14px; font-weight:500; color:var(--ink-3); text-decoration:none; transition:color .2s; }
+.nav-links a:hover { color:var(--ink); }
+.nav-cta { background:var(--red); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:600; padding:10px 24px; border:none; border-radius:10px; cursor:pointer; transition:background .2s, transform .15s; }
+.nav-cta:hover { background:var(--red-hover); transform:translateY(-1px); }
+
+/* ── BREADCRUMB ── */
+.breadcrumb { padding:88px 48px 0; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-3); }
+.breadcrumb a { color:var(--ink-3); text-decoration:none; transition:color .2s; }
+.breadcrumb a:hover { color:var(--red); }
+.breadcrumb strong { color:var(--ink-2); font-weight:500; }
+
+/* ── PAGE HERO ── */
+.page-hero { padding:32px 48px 40px; display:flex; align-items:center; gap:20px; }
+.tool-icon-big { width:64px; height:64px; border-radius:18px; background:var(--red-light); border:1.5px solid rgba(224,43,32,0.2); display:grid; place-items:center; font-size:30px; flex-shrink:0; }
+.page-title { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; line-height:1.1; color:var(--ink); margin-bottom:6px; }
+.page-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); }
+.page-sub { font-size:15px; color:var(--ink-3); }
+
+/* ── MAIN ── */
+.main { padding:0 48px 80px; }
+input[type="file"] { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+
+/* ── UPLOAD ZONE ── */
+.upload-zone { background:var(--white); border:2px dashed var(--border); border-radius:20px; padding:56px 40px; text-align:center; transition:border-color .25s, background .25s, box-shadow .25s; margin-bottom:24px; }
+.upload-zone:hover, .upload-zone.drag-on { border-color:var(--red); background:var(--red-light); box-shadow:0 0 0 4px rgba(224,43,32,0.06); }
+.uz-icon { width:64px; height:64px; border-radius:16px; background:var(--bg); border:1.5px solid var(--border); display:grid; place-items:center; font-size:28px; margin:0 auto 20px; transition:all .25s; }
+.upload-zone:hover .uz-icon { background:rgba(224,43,32,.08); border-color:rgba(224,43,32,.3); transform:translateY(-4px); }
+.uz-title { font-size:18px; font-weight:700; letter-spacing:-0.3px; color:var(--ink); margin-bottom:6px; }
+.uz-sub { font-size:13px; color:var(--ink-3); margin-bottom:22px; }
+.uz-btn { background:var(--red); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:600; padding:12px 32px; border:none; border-radius:10px; display:inline-block; cursor:pointer; transition:background .2s; }
+.uz-btn:hover { background:var(--red-hover); }
+.uz-note { margin-top:14px; font-size:12px; color:var(--ink-3); }
+
+/* ── OCR WORKSPACE ── */
+.ocr-workspace { display:none; gap:24px; margin-bottom:24px; }
+.ocr-workspace.active { display:grid; grid-template-columns: 350px 1fr; }
+
+.panel-box { background:var(--white); border:1.5px solid var(--border); border-radius:20px; overflow:hidden; display:flex; flex-direction:column; }
+.panel-header { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--bg); }
+.panel-title { font-size:14px; font-weight:700; color:var(--ink); }
+
+/* Image Preview Side */
+.preview-area { padding:20px; display:flex; flex-direction:column; align-items:center; gap:16px; background:#f0f0f0; flex-grow:1; }
+.img-preview { max-width:100%; max-height:300px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+.lang-select-wrap { width:100%; display:flex; flex-direction:column; gap:6px; }
+.lang-label { font-size:12px; font-weight:600; color:var(--ink-2); text-transform:uppercase; letter-spacing:0.05em; }
+.lang-select { width:100%; padding:10px 14px; background:var(--white); border:1.5px solid var(--border); border-radius:10px; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; color:var(--ink); outline:none; }
+.lang-select:focus { border-color:var(--red); }
+.btn-extract { width:100%; background:var(--red); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:700; padding:14px; border:none; border-radius:12px; cursor:pointer; transition:background .2s, transform .15s; display:flex; justify-content:center; align-items:center; gap:8px; }
+.btn-extract:hover { background:var(--red-hover); transform:translateY(-2px); }
+.btn-extract:disabled { background:#ccc; cursor:not-allowed; transform:none; }
+
+/* Text Result Side */
+.text-area-wrap { padding:0; flex-grow:1; display:flex; flex-direction:column; position:relative; }
+.result-text { width:100%; height:100%; min-height:350px; padding:24px; border:none; resize:none; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; line-height:1.6; color:var(--ink); outline:none; }
+.result-text:focus { background:rgba(248,247,244,0.5); }
+.action-bar { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:12px; background:var(--bg); }
+.btn-action { background:var(--white); color:var(--ink-2); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:600; padding:10px 20px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px; }
+.btn-action:hover { border-color:var(--ink); color:var(--ink); }
+.btn-action.primary { background:var(--success); color:#fff; border-color:var(--success); }
+.btn-action.primary:hover { background:#236e3d; border-color:#236e3d; }
+
+/* ── PROGRESS BAR ── */
+.progress-overlay { position:absolute; inset:0; background:rgba(255,255,255,0.9); display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; z-index:10; }
+.progress-overlay.active { display:flex; }
+.prog-title { font-size:16px; font-weight:700; color:var(--ink); margin-bottom:12px; }
+.prog-status { font-size:13px; color:var(--ink-3); margin-bottom:16px; text-align:center; }
+.line-loader { width:100%; max-width:300px; height:6px; background:var(--border); border-radius:999px; overflow:hidden; }
+.line-loader-fill { height:100%; background:var(--red); border-radius:999px; width:0%; transition:width 0.2s ease; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:28px; right:28px; z-index:9999; background:var(--ink); color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.15); transform:translateY(80px); opacity:0; transition:all .3s ease; max-width:320px; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.success { background:var(--success); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .ocr-workspace.active { grid-template-columns: 1fr; }
+  .preview-area { border-bottom:1px solid var(--border); }
+}
+@media(max-width:768px){
+  nav { padding:0 20px; } .nav-links { display:none; }
+  .breadcrumb, .page-hero, .main { padding-left:20px; padding-right:20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFile(this.files[0])">
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><img src="favicon.ico" alt="Convertkaro"></div>
+    <div class="logo-name">Convertkaro<span>.in</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#tools">All Tools</a></li>
+    <li><a href="#">How it works</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <label for="fileInput" class="nav-cta" style="cursor:pointer;">Upload Image</label>
+</nav>
+
+<div class="breadcrumb">
+  <a href="index.html">Home</a> <span>›</span> <a href="index.html#tools">All Tools</a> <span>›</span> <strong>Extract Text (OCR)</strong>
+</div>
+
+<div class="page-hero">
+  <div class="tool-icon-big">👁️</div>
+  <div>
+    <h1 class="page-title">Extract Text <span class="serif">from Images</span></h1>
+    <p class="page-sub">Convert pictures of text into editable text formats. Supports English & Hindi. 100% private.</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="upload-zone" id="uploadZone">
+    <div class="uz-icon">📸</div>
+    <div class="uz-title">Drop your image here</div>
+    <div class="uz-sub">Supports JPG, PNG, WEBP</div>
+    <label for="fileInput" class="uz-btn" style="display:inline-block;cursor:pointer;">Choose Image</label>
+    <div class="uz-note">🔒 Powered by browser OCR — your image is never uploaded to any server</div>
+  </div>
+
+  <div class="ocr-workspace" id="ocrWorkspace">
+    
+    <div class="panel-box">
+      <div class="panel-header">
+        <div class="panel-title">Image Setup</div>
+        <button class="btn-action" style="padding:4px 8px; font-size:12px;" onclick="resetTool()">✕ Change</button>
+      </div>
+      <div class="preview-area">
+        <img src="" id="imagePreview" class="img-preview" alt="Preview">
+        
+        <div class="lang-select-wrap">
+          <label class="lang-label">Text Language</label>
+          <select id="langSelect" class="lang-select">
+            <option value="eng">English Only</option>
+            <option value="hin">Hindi (हिंदी) Only</option>
+            <option value="eng+hin" selected>English + Hindi Mixed</option>
+          </select>
+        </div>
+
+        <button class="btn-extract" id="startBtn" onclick="doOCR()">
+          ✨ Extract Text Now
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-box">
+      <div class="panel-header">
+        <div class="panel-title">Extracted Text</div>
+      </div>
+      <div class="text-area-wrap">
+        <textarea id="resultText" class="result-text" placeholder="Your extracted text will appear here... you can edit it directly." disabled></textarea>
+        
+        <div class="progress-overlay" id="progressOverlay">
+          <div class="prog-title" id="progTitle">Analyzing Image...</div>
+          <div class="prog-status" id="progStatus">Downloading language data (First time only)</div>
+          <div class="line-loader">
+            <div class="line-loader-fill" id="progFill"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="action-bar">
+        <button class="btn-action primary" id="copyBtn" onclick="copyText()" disabled>
+          📋 Copy to Clipboard
+        </button>
+        <button class="btn-action" id="downloadBtn" onclick="downloadText()" disabled>
+          ⬇ Save as .txt
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <div class="ft-copy">© 2026 Convertkaro.in — All rights reserved.</div>
+  <div class="ft-india">Made with <span>♥</span> in India 🇮🇳</div>
+</footer>
+
+<script>
+let currentFile = null;
+
+// ── Drag & Drop ──
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-on'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-on'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-on');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('image/')) handleFile(f);
+  else showToast('Please drop a valid image file', 'error');
+});
+
+function handleFile(f) {
+  if(!f || !f.type.startsWith('image/')) return;
+  currentFile = f;
+  
+  // Show preview
+  const previewUrl = URL.createObjectURL(f);
+  document.getElementById('imagePreview').src = previewUrl;
+  
+  // Switch UI
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('ocrWorkspace').classList.add('active');
+  
+  // Clear previous results
+  document.getElementById('resultText').value = '';
+  document.getElementById('resultText').disabled = true;
+  document.getElementById('copyBtn').disabled = true;
+  document.getElementById('downloadBtn').disabled = true;
+}
+
+// ── DIRECT OCR LOGIC ──
+async function doOCR() {
+  if(!currentFile) return;
+  
+  const lang = document.getElementById('langSelect').value;
+  const startBtn = document.getElementById('startBtn');
+  const overlay = document.getElementById('progressOverlay');
+  const progStatus = document.getElementById('progStatus');
+  const progFill = document.getElementById('progFill');
+  const resultText = document.getElementById('resultText');
+
+  startBtn.disabled = true;
+  startBtn.innerHTML = 'Extracting...';
+  overlay.classList.add('active');
+  resultText.value = '';
+
+  try {
+    // Tesseract's simple & robust recognize API
+    const { data: { text } } = await Tesseract.recognize(
+      currentFile,
+      lang,
+      {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            progStatus.textContent = 'Scanning text...';
+            progFill.style.width = Math.round(m.progress * 100) + '%';
+          } else {
+            progStatus.textContent = 'Loading AI Engine & Languages...';
+            progFill.style.width = '30%';
+          }
+        }
+      }
+    );
+    
+    // Show Result
+    overlay.classList.remove('active');
+    resultText.value = text;
+    resultText.disabled = false; // Allow user to edit
+    
+    document.getElementById('copyBtn').disabled = false;
+    document.getElementById('downloadBtn').disabled = false;
+    
+    startBtn.innerHTML = '✨ Extract Text Now';
+    startBtn.disabled = false;
+    showToast('Text extracted successfully!', 'success');
+
+  } catch(err) {
+    console.error(err);
+    overlay.classList.remove('active');
+    startBtn.innerHTML = '✨ Extract Text Now';
+    startBtn.disabled = false;
+    showToast('Error extracting text. Try again.', 'error');
+  }
+}
+
+// ── Helpers ──
+function copyText() {
+  const text = document.getElementById('resultText').value;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copied to clipboard!', 'success');
+  });
+}
+
+function downloadText() {
+  const text = document.getElementById('resultText').value;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'extracted_text.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function resetTool() {
+  currentFile = null;
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('ocrWorkspace').classList.remove('active');
+  document.getElementById('fileInput').value = '';
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; 
+  t.className = 'toast show' + (type ? ' '+type : '');
+  clearTimeout(t._t); 
+  t._t = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

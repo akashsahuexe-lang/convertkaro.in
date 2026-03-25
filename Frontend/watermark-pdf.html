@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Watermark PDF: Drag & Drop Edition — Convertkaro.in</title>
+<meta name="description" content="Add a custom text watermark to your PDF files. Drag and drop to position, rotate, and resize instantly.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+</script>
+
+<style>
+/* ── BASIC SETUP ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+:root { --bg: #f8f7f4; --white: #ffffff; --red: #e02b20; --red-hover: #c4231a; --red-light: rgba(224,43,32,0.07); --ink: #141414; --ink-2: #3d3d3d; --ink-3: #888; --border: #e4e2dc; --success: #2d8a4e; }
+body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+
+/* Nav & Breadcrumb */
+nav { position:fixed; top:0; left:0; right:0; z-index:100; height:68px; display:flex; align-items:center; justify-content:space-between; padding:0 48px; background:rgba(248,247,244,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+.logo { display:flex; align-items:center; gap:9px; text-decoration:none; } .logo-mark img { width:32px; height:32px; object-fit:cover; border-radius:8px; }
+.logo-name { font-size:17px; font-weight:700; color:var(--ink); } .logo-name span { color:var(--red); }
+.nav-links { display:flex; gap:32px; list-style:none; } .nav-links a { font-size:14px; font-weight:500; color:var(--ink-3); text-decoration:none; }
+.breadcrumb { padding:88px 48px 0; font-size:13px; color:var(--ink-3); } .breadcrumb a { color:var(--ink-3); text-decoration:none; }
+
+/* Hero */
+.page-hero { padding:32px 48px 40px; display:flex; align-items:center; gap:20px; }
+.tool-icon-big { width:64px; height:64px; border-radius:18px; background:var(--red-light); border:1.5px solid rgba(224,43,32,0.2); display:grid; place-items:center; font-size:30px; }
+.page-title { font-size:clamp(26px,4vw,38px); font-weight:800; color:var(--ink); margin-bottom:6px; } .page-title .serif { font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:var(--red); }
+.page-sub { font-size:15px; color:var(--ink-3); }
+
+.main { padding:0 48px 80px; max-width:1200px; margin:0 auto; } 
+
+/* Upload Zone */
+input[type="file"] { display:none; }
+.upload-zone { background:var(--white); border:2px dashed var(--border); border-radius:20px; padding:48px 40px; text-align:center; transition:all .25s; margin-bottom:24px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; }
+.upload-zone:hover { border-color:var(--red); background:var(--red-light); }
+.uz-icon { width:56px; height:56px; border-radius:14px; background:var(--bg); border:1.5px solid var(--border); display:grid; place-items:center; font-size:24px; margin-bottom:16px; }
+.uz-title { font-size:18px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.uz-btn { background:var(--red); color:#fff; font-size:14px; font-weight:600; padding:10px 28px; border-radius:10px; display:inline-block; margin-top:10px; }
+
+/* Workspace */
+.workspace { display:none; gap:24px; }
+.workspace.active { display:grid; grid-template-columns: 350px 1fr; }
+
+.panel-box { background:var(--white); border:1.5px solid var(--border); border-radius:20px; padding:24px; display:flex; flex-direction:column; }
+.panel-title { font-size:16px; font-weight:700; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px; }
+.btn-ghost { background:transparent; border:1.5px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:0.2s; }
+
+/* Controls */
+.control-group { margin-bottom:20px; }
+.control-label { font-size:13px; font-weight:700; color:var(--ink-2); margin-bottom:8px; display:block; }
+.input-field { width:100%; padding:12px 16px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:0.2s; }
+.input-field:focus { border-color:var(--red); }
+
+/* Sliders */
+.slider-wrap { display:flex; align-items:center; gap:12px; }
+.range-slider { flex-grow:1; accent-color:var(--red); cursor:pointer;}
+.slider-value { font-size:13px; font-weight:700; color:var(--red); min-width:35px; text-align:right;}
+
+/* Colors */
+.color-options-wrap { display:flex; align-items:center; gap:16px; }
+.color-btn { width:38px; height:38px; border-radius:10px; border:2px solid transparent; cursor:pointer; transition:0.2s; }
+.color-btn.active { border-color:var(--red); transform:scale(1.05); box-shadow:0 0 0 3px var(--red-light); }
+.c-black { background:#141414; }
+.color-palette-input { width: 38px; height: 38px; border: 2px solid var(--border); border-radius: 10px; padding: 0; cursor: pointer; background: none; }
+.color-palette-input.active { border-color:var(--red); }
+.color-palette-input::-webkit-color-swatch-wrapper { padding: 2px; }
+.color-palette-input::-webkit-color-swatch { border: none; border-radius: 6px; }
+
+.btn-primary { background:var(--success); color:#fff; font-size:15px; font-weight:700; padding:16px; border:none; border-radius:12px; cursor:pointer; margin-top:auto; transition:transform 0.1s; width:100%; }
+.btn-primary:hover { transform:translateY(-2px); background:#236e3d; }
+
+/* ── INTERACTIVE CANVAS PREVIEW ── */
+.preview-wrapper { flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg); border-radius:12px; border:1.5px dashed var(--border); overflow:hidden; position:relative; min-height: 500px; padding:20px;}
+.canvas-container { position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: inline-block; background: #fff;}
+#pdfCanvas { display: block; max-width: 100%; height: auto; }
+
+/* The Draggable Watermark Overlay */
+#wmOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Start at center */
+  cursor: grab;
+  user-select: none;
+  font-weight: bold;
+  font-family: 'Helvetica', sans-serif;
+  white-space: nowrap;
+  line-height: 1;
+  text-align: center;
+  /* Visual boundary to show it's draggable */
+  border: 2px dashed transparent; 
+  padding: 4px;
+  transition: border 0.2s;
+}
+#wmOverlay:hover { border-color: var(--red); }
+#wmOverlay:active { cursor: grabbing; border-color: var(--red); }
+
+@media(max-width:768px){ .workspace.active { grid-template-columns: 1fr; } nav { padding:0 20px;} .nav-links{display:none;} .main{padding:0 20px 80px;} .preview-wrapper{min-height: 350px;} }
+</style>
+</head>
+<body>
+
+<input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this.files[0])">
+
+<nav>
+  <a href="index.html" class="logo">Convertkaro<span>.in</span></a>
+</nav>
+
+<div class="breadcrumb"><a href="index.html">Home</a> › <strong>Pro Watermark PDF</strong></div>
+
+<div class="page-hero">
+  <div class="tool-icon-big">📝</div>
+  <div>
+    <h1 class="page-title">Pro <span class="serif">Watermark</span> Tool</h1>
+    <p class="page-sub">Drag, drop, rotate, and resize your watermark directly on the page.</p>
+  </div>
+</div>
+
+<div class="main">
+  <label class="upload-zone" id="uploadZone" for="fileInput">
+    <div class="uz-icon">📄</div>
+    <div class="uz-title">Upload your PDF</div>
+    <div style="font-size:13px; color:#888;">Select a document to add an interactive watermark</div>
+    <div class="uz-btn">Choose PDF</div>
+  </label>
+
+  <div class="workspace" id="workspace">
+    
+    <div class="panel-box">
+      <div class="panel-title">Watermark Settings</div>
+
+      <div class="control-group">
+        <label class="control-label">1. Watermark Text</label>
+        <input type="text" id="wmText" class="input-field" value="CONFIDENTIAL" oninput="updateUI()">
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">2. Text Color</label>
+        <div class="color-options-wrap">
+          <div class="color-btn c-black active" id="btnColorBlack" onclick="selectColor(this, [0, 0, 0], '#000000')"></div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="color" id="customColorPicker" class="color-palette-input" value="#e02b20" oninput="selectColor(this, null, this.value)">
+            <span style="font-size:13px; font-weight:600; color:var(--ink-2)">Custom</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">3. Font Size</label>
+        <div class="slider-wrap">
+          <input type="range" id="sizeSlider" class="range-slider" min="10" max="150" step="1" value="60" oninput="updateUI()">
+          <span class="slider-value" id="sizeValue">60</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">4. Rotation Angle</label>
+        <div class="slider-wrap">
+          <input type="range" id="angleSlider" class="range-slider" min="-180" max="180" step="5" value="-45" oninput="updateUI()">
+          <span class="slider-value" id="angleValue">-45°</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">5. Transparency</label>
+        <div class="slider-wrap">
+          <input type="range" id="opacitySlider" class="range-slider" min="0.1" max="1" step="0.1" value="0.3" oninput="updateUI()">
+          <span class="slider-value" id="opacityValue">0.3</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="actionBtn" onclick="applyWatermarkToPDF()">⬇ Stamp & Download</button>
+    </div>
+
+    <div class="panel-box">
+      <div class="panel-title">
+        Drag & Position Preview
+        <button class="btn-ghost" style="color:var(--red); border-color:var(--red);" onclick="location.reload()">✕ Reset</button>
+      </div>
+      
+      <div class="preview-wrapper">
+        <div id="loadingMsg" style="display:none; position:absolute; z-index:50; background:rgba(255,255,255,0.9); inset:0; flex-direction:column; align-items:center; justify-content:center; font-weight:bold;">⏳ Loading Preview...</div>
+        
+        <div class="canvas-container" id="canvasContainer" style="display:none;">
+          <canvas id="pdfCanvas"></canvas>
+          <div id="wmOverlay">CONFIDENTIAL</div>
+        </div>
+
+      </div>
+      <p style="text-align:center; font-size:12px; color:var(--ink-3); margin-top:16px;">💡 Use your mouse to drag the watermark anywhere on the page.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let selectedFile = null;
+let originalBytes = null;
+let pdfPageWidth = 0;
+let pdfPageHeight = 0;
+
+// Default Settings
+let wmColorRGB = [0, 0, 0];
+let wmColorHex = '#000000';
+
+// Overlay Elements
+const overlay = document.getElementById('wmOverlay');
+const canvasContainer = document.getElementById('canvasContainer');
+
+// --- 1. HANDLE FILE & RENDER CANVAS ---
+async function handleFile(f) {
+  if(!f || f.type !== 'application/pdf') return alert("Please upload a PDF file.");
+  selectedFile = f;
+  
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('workspace').classList.add('active');
+  document.getElementById('loadingMsg').style.display = 'flex';
+
+  originalBytes = await f.arrayBuffer();
+
+  // Use PDF.js to render Page 1 to Canvas
+  try {
+    const loadingTask = pdfjsLib.getDocument({data: new Uint8Array(originalBytes)});
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(1);
+    
+    // Get actual PDF dimensions
+    const unscaledViewport = page.getViewport({ scale: 1 });
+    pdfPageWidth = unscaledViewport.width;
+    pdfPageHeight = unscaledViewport.height;
+
+    // Render scale for good preview quality
+    const viewport = page.getViewport({ scale: 1.2 }); 
+    const canvas = document.getElementById('pdfCanvas');
+    const context = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({ canvasContext: context, viewport: viewport }).promise;
+    
+    document.getElementById('loadingMsg').style.display = 'none';
+    canvasContainer.style.display = 'inline-block';
+    
+    updateUI(); // Apply initial styles to overlay
+
+  } catch (err) {
+    console.error(err);
+    alert("Error loading PDF preview.");
+  }
+}
+
+// --- 2. UPDATE HTML UI OVERLAY ---
+function selectColor(btnElement, rgbArray, hexValue) {
+  document.getElementById('btnColorBlack').classList.remove('active');
+  document.getElementById('customColorPicker').classList.remove('active');
+  if(btnElement) btnElement.classList.add('active');
+
+  wmColorHex = hexValue;
+  if(rgbArray) {
+    wmColorRGB = rgbArray;
+  } else {
+    // Convert hex from color picker to RGB
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexValue);
+    wmColorRGB = result ? [ parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255 ] : [0,0,0];
+  }
+  updateUI();
+}
+
+function updateUI() {
+  const text = document.getElementById('wmText').value || " ";
+  const size = document.getElementById('sizeSlider').value;
+  const angle = document.getElementById('angleSlider').value;
+  const opacity = document.getElementById('opacitySlider').value;
+
+  // Update Labels
+  document.getElementById('sizeValue').textContent = size;
+  document.getElementById('angleValue').textContent = angle + '°';
+  document.getElementById('opacityValue').textContent = opacity;
+
+  // Apply to Draggable Overlay
+  overlay.textContent = text;
+  overlay.style.color = wmColorHex;
+  overlay.style.opacity = opacity;
+  // Note: CSS rotate happens clockwise.
+  overlay.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+  
+  // Calculate relative font size for HTML vs actual PDF
+  // We need the overlay font size to *look* like what it will be on the PDF.
+  // The canvas is scaled visually by CSS, but internal width is fixed.
+  // For simplicity, we just use the raw size, PDF-lib will handle its own sizing.
+  overlay.style.fontSize = size + 'px'; 
+}
+
+// --- 3. DRAG & DROP MOUSE LOGIC ---
+let isDragging = false;
+let startX, startY, initialLeft, initialTop;
+
+// Mouse Events
+overlay.addEventListener('mousedown', dragStart);
+document.addEventListener('mousemove', dragMove);
+document.addEventListener('mouseup', dragEnd);
+
+// Touch Events for Mobile
+overlay.addEventListener('touchstart', (e) => { e.preventDefault(); dragStart(e.touches[0]); }, {passive: false});
+document.addEventListener('touchmove', (e) => { if(isDragging) { e.preventDefault(); dragMove(e.touches[0]); } }, {passive: false});
+document.addEventListener('touchend', dragEnd);
+
+function dragStart(e) {
+  isDragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  
+  // Convert 50% initial positioning to absolute pixels to allow smooth dragging
+  if (overlay.style.top === '50%') {
+    overlay.style.left = overlay.offsetLeft + 'px';
+    overlay.style.top = overlay.offsetTop + 'px';
+  }
+  
+  initialLeft = overlay.offsetLeft;
+  initialTop = overlay.offsetTop;
+}
+
+function dragMove(e) {
+  if (!isDragging) return;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  
+  // Keep inside container bounds roughly
+  let newLeft = initialLeft + dx;
+  let newTop = initialTop + dy;
+
+  overlay.style.left = newLeft + 'px';
+  overlay.style.top = newTop + 'px';
+}
+
+function dragEnd() {
+  isDragging = false;
+}
+
+// --- 4. THE MAGIC: APPLY TO PDF-LIB ---
+async function applyWatermarkToPDF() {
+  if(!originalBytes) return;
+  const btn = document.getElementById('actionBtn');
+  btn.disabled = true; btn.innerText = "Processing...";
+
+  try {
+    const { PDFDocument, rgb, degrees, StandardFonts } = PDFLib;
+    const pdfDoc = await PDFDocument.load(originalBytes);
+    const pages = pdfDoc.getPages();
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    
+    // Get values
+    const text = document.getElementById('wmText').value || " ";
+    const pdfFontSize = parseFloat(document.getElementById('sizeSlider').value);
+    const angle = parseFloat(document.getElementById('angleSlider').value);
+    const opacity = parseFloat(document.getElementById('opacitySlider').value);
+
+    // Coordinate Mapping (HTML to PDF)
+    const overlayRect = overlay.getBoundingClientRect();
+    const containerRect = canvasContainer.getBoundingClientRect();
+    
+    // Find center of HTML Overlay relative to Canvas Container
+    const centerX_HTML = (overlayRect.left - containerRect.left) + (overlayRect.width / 2);
+    const centerY_HTML = (overlayRect.top - containerRect.top) + (overlayRect.height / 2);
+
+    // Find scale ratio
+    const scaleX = pdfPageWidth / containerRect.width;
+    const scaleY = pdfPageHeight / containerRect.height;
+
+    // Map to PDF coordinates (PDF origin is bottom-left, HTML is top-left)
+    const pdfCenterX = centerX_HTML * scaleX;
+    const pdfCenterY = pdfPageHeight - (centerY_HTML * scaleY);
+
+    // Apply to all pages
+    for (const page of pages) {
+      // PDF-Lib draws text from the bottom-left baseline. 
+      // To rotate around the visual center, we approximate the offset.
+      const textWidth = helveticaFont.widthOfTextAtSize(text, pdfFontSize);
+      const textHeight = helveticaFont.heightAtSize(pdfFontSize);
+      
+      // Calculate unrotated bottom-left anchor point
+      const anchorX = pdfCenterX - (textWidth / 2);
+      const anchorY = pdfCenterY - (textHeight / 3); // rough baseline adjust
+
+      // Apply rotation math (Because we want to rotate around center, not anchor)
+      const rad = (-angle) * Math.PI / 180;
+      const dx = anchorX - pdfCenterX;
+      const dy = anchorY - pdfCenterY;
+      
+      const rotatedX = pdfCenterX + (dx * Math.cos(rad) - dy * Math.sin(rad));
+      const rotatedY = pdfCenterY + (dx * Math.sin(rad) + dy * Math.cos(rad));
+
+      page.drawText(text, {
+        x: rotatedX,
+        y: rotatedY,
+        size: pdfFontSize,
+        font: helveticaFont,
+        color: rgb(wmColorRGB[0], wmColorRGB[1], wmColorRGB[2]),
+        opacity: opacity,
+        rotate: degrees(-angle), // CSS is clockwise, PDF-lib is counter-clockwise
+      });
+    }
+
+    // Download
+    const modifiedBytes = await pdfDoc.save();
+    const blob = new Blob([modifiedBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a'); a.href = url; a.download = `watermarked_convertkaro.pdf`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+  } catch (error) {
+    console.error(error); alert("Error processing PDF.");
+  }
+  btn.disabled = false; btn.innerText = "⬇ Stamp & Download";
+}
+</script>
+</body>
+</html>

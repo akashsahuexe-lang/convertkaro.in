@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crop PDF Tool — Convertkaro.in</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="logo">
+        <div class="logo-mark"><img src="favicon.ico" alt="CK"></div>
+        <div class="logo-name">Convertkaro<span>.in</span></div>
+    </a>
+</nav>
+
+<div class="breadcrumb"><a href="index.html">Home</a> › <strong>Crop PDF</strong></div>
+
+<div class="page-hero">
+    <div class="tool-icon-big">✂️</div>
+    <div>
+        <div class="student-badge-hero">📄 PDF Utility</div>
+        <h1 class="page-title">Crop PDF <span class="serif">Pages</span></h1>
+        <p class="page-sub">Select an area to crop from your PDF pages. Fast, secure, and 100% offline.</p>
+    </div>
+</div>
+
+<main class="main">
+    <div class="workspace">
+        <div id="uploadArea" class="upload-zone">
+            <input type="file" id="pdfInput" accept="application/pdf" hidden>
+            <div class="upload-content" onclick="document.getElementById('pdfInput').click()">
+                <div class="upload-icon">📁</div>
+                <p>Click to upload or Drag & Drop PDF</p>
+            </div>
+        </div>
+
+        <div id="cropWorkspace" style="display:none;">
+            <div class="crop-container" style="max-height: 500px; overflow: hidden;">
+                <canvas id="pdfCanvas"></canvas>
+            </div>
+            
+            <div class="controls-bar" style="margin-top:20px; display:flex; gap:12px;">
+                <button id="btnCrop" class="btn-primary">Crop & Download PDF</button>
+                <button onclick="location.reload()" class="btn-restart">Reset</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script src="crop-logic.js" defer></script>
+</body>
+</html>
